@@ -4,7 +4,7 @@ package com.example._2024_danpoong_team_39_be.login.dto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import com.example._2024_danpoong_team_39_be.login.domain.Member;
+import com.example._2024_danpoong_team_39_be.domain.Member;
 @Getter
 @Setter
 public class MemberResponseDTO {
