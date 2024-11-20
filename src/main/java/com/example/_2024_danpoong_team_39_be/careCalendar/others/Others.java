@@ -1,0 +1,20 @@
+package com.example._2024_danpoong_team_39_be.careCalendar.others;
+
+
+import com.example._2024_danpoong_team_39_be.calendar.Calendar;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+@Getter
+@Setter
+public class Others {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @OneToOne
+    @JoinColumn(name = "calendar_id")  // This will join the "Calendar" entity
+    private Calendar calendar;
+}
