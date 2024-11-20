@@ -68,4 +68,44 @@ public class KakaoUtil {
         }
         return oAuthToken;
     }
+
+    // Kakao 서버에 유저 정보 요청
+    public KakaoDTO.KakaoProfile requestProfile(KakaoDTO.OAuthToken oAuthToken){
+
+        // 보낼 RestTemplate 생성
+        RestTemplate restTemplate2 = new RestTemplate();
+        HttpHeaders headers2 = new HttpHeaders();
+
+        // 헤더에 토큰 추가
+        headers2.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+        headers2.add("Authorization","Bearer "+ oAuthToken.getAccess_token());
+
+        // 헤더 묶기
+        HttpEntity<MultiValueMap<String,String>> kakaoProfileRequest = new HttpEntity <>(headers2);
+
+        // 카카오 서버에 유저 정보 요청
+        ResponseEntity<String> response2 = restTemplate2.exchange(
+                "https://kapi.kakao.com/v2/user/me",
+                HttpMethod.GET,
+                kakaoProfileRequest,
+                String.class);
+
+        // 사용자 정보 확인용 로그
+        log.info("response 2" + response2.getBody());
+
+        // 사용자 정보값을 KakaoDTO.KakaoProfile 객체로 변환
+        ObjectMapper objectMapper = new ObjectMapper();
+        KakaoDTO.KakaoProfile kakaoProfile = null;
+
+        // JsonProcessingException 예외처리
+        try {
+            kakaoProfile = objectMapper.readValue(response2.getBody(), KakaoDTO.KakaoProfile.class);
+            log.info("KakaoProfile: " + kakaoProfile);
+        } catch (JsonProcessingException e) {
+            log.info(Arrays.toString(e.getStackTrace()));
+            throw new AuthHandler(ErrorStatus._PARSING_ERROR);
+        }
+
+        return kakaoProfile;
+    }
 }
