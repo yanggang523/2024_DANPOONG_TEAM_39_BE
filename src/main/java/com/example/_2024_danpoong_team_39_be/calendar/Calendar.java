@@ -27,6 +27,13 @@ public class Calendar {
     private String event_type; // 일정타입 공부, 팀플 등등
     @Column(nullable = false)
     private LocalTime startTime; // 시작 시간
+    @PrePersist
+    @PreUpdate
+    private void validateTime() {
+        if (endTime.isBefore(startTime)) {
+            throw new IllegalArgumentException("종료 시간은 시작 시간보다 앞설 수 없습니다.");
+        }
+    }
     @Column(nullable = false)
     private LocalTime endTime; // 종료 시간
     @Column(nullable = false)
@@ -42,7 +49,7 @@ public class Calendar {
         DAILY, WEEKLY, MONTHLY
     }
 
-    /// 카테고리별 추가 정보 (식사, 병원, 휴식, 복약)
+    /// 카테고리별 추가 정보 (식사, 병원, 휴식, 복약, 내일정)
     @OneToOne(mappedBy = "calendar", cascade = CascadeType.ALL)
     private Meal meal;
 
@@ -57,6 +64,9 @@ public class Calendar {
 
     @OneToOne(mappedBy = "calendar", cascade = CascadeType.ALL)
     private Others others;
+
+    @OneToOne(mappedBy = "calendar", cascade = CascadeType.ALL)
+    private MyCalendar myCalendar;
 
     private String category;
 }

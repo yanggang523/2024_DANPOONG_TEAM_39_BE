@@ -32,6 +32,9 @@ public class CalendarController {
         if (calendar.getIsShared() == null) {
             calendar.setIsShared(false);
         }
+        if (calendar.getCategory() == null || calendar.getCategory().isEmpty()) {
+            calendar.setCategory("myCalendar");
+        }
         return calendarService.addEvent(calendar);
     }
 

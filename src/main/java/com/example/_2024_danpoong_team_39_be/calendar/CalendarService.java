@@ -32,6 +32,11 @@ public class CalendarService {
 
     // 일정 추가
     public Calendar addEvent(Calendar calendar) {
+        // 시간 충돌 검사
+        if (isTimeConflict(calendar)) {
+            throw new IllegalArgumentException("해당 시간대에 이미 일정이 존재합니다.");
+        }
+
         // 주기 설정에 따라 일정 시작 날짜를 자동으로 생성
         if (calendar.getRepeatCycle() != null) {
             LocalDate startDate = calendar.getDate(); // startDate 가져오기
@@ -61,6 +66,11 @@ public class CalendarService {
                 repeatEvent.setRest(calendar.getRest());
                 repeatEvent.setMedication(calendar.getMedication());
 
+                // 시간 충돌 검사
+                if (isTimeConflict(repeatEvent)) {
+                    throw new IllegalArgumentException("반복 일정 중 일부가 이미 존재하는 일정과 겹칩니다.");
+                }
+
                 // 반복 일정 저장
                 calendarRepository.save(repeatEvent);
             }
@@ -87,6 +97,14 @@ public class CalendarService {
 
         return calendar;  // 추가된 일정 객체를 반환
     }
+
+    // 시간 충돌 검사 메서드
+    private boolean isTimeConflict(Calendar calendar) {
+        List<Calendar> conflictingEvents = calendarRepository.findByDateAndStartTimeLessThanEqualAndEndTimeGreaterThanEqual(
+                calendar.getDate(), calendar.getEndTime(), calendar.getStartTime());
+        return !conflictingEvents.isEmpty();
+    }
+
 
     // 반복 주기에 따라 날짜 리스트 생성
     private List<LocalDate> generateRepeatDates(LocalDate startDate, Calendar.RepeatCycle repeatCycle) {
@@ -143,6 +161,9 @@ public class CalendarService {
             case "others":
                 // "others" 카테고리는 제약이 없으므로 추가적인 검증은 없음
                 break;
+            case "myCalendar":
+                // "others" 카테고리는 제약이 없으므로 추가적인 검증은 없음
+                break;
             default:
                 throw new IllegalArgumentException("유효하지 않은 카테고리입니다.");
         }
@@ -166,11 +187,16 @@ public class CalendarService {
 
             // 날짜가 일치하는 경우에만 수정
             if (calendar.getId().equals(id)) {
+                // 시간 충돌 검사
+                if (isTimeConflict(updatedCalendar, id)) {
+                    throw new IllegalArgumentException("해당 시간대에 이미 일정이 존재합니다.");
+                }
+
                 // 기존 일정에서 변경된 필드만 업데이트
                 if (updatedCalendar.getTitle() != null) {
                     calendar.setTitle(updatedCalendar.getTitle());
                 }
-                if(updatedCalendar.getEvent_type() != null){
+                if (updatedCalendar.getEvent_type() != null) {
                     calendar.setEvent_type(updatedCalendar.getEvent_type());
                 }
                 if (updatedCalendar.getStartTime() != null) {
@@ -259,6 +285,9 @@ public class CalendarService {
                             case "others":
                                 // "others" 카테고리는 제약이 없으므로 추가적인 검증은 없음
                                 break;
+                            case "myCalendar":
+                                // "others" 카테고리는 제약이 없으므로 추가적인 검증은 없음
+                                break;
                             default:
                                 throw new IllegalArgumentException("유효하지 않은 카테고리입니다.");
                         }
@@ -280,6 +309,16 @@ public class CalendarService {
         }
         return null;
     }
+
+    // 시간 충돌 검사 메서드
+    private boolean isTimeConflict(Calendar calendar, Long id) {
+        List<Calendar> conflictingEvents = calendarRepository.findByDateAndStartTimeLessThanEqualAndEndTimeGreaterThanEqual(
+                calendar.getDate(), calendar.getEndTime(), calendar.getStartTime());
+
+        // 현재 일정(id)을 제외한 일정들 중에 충돌이 있는지 확인
+        return conflictingEvents.stream().anyMatch(event -> !event.getId().equals(id));
+    }
+
 
 
     // 세부 일정 삭제
