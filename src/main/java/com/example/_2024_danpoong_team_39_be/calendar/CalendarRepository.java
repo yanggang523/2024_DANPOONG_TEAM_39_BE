@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Repository
@@ -21,4 +22,6 @@ public interface CalendarRepository extends JpaRepository<Calendar, Long> {
     // isShared가 true이고 startDate가 특정 주의 날짜 리스트에 포함된 일정 조회
     List<Calendar> findByDateInAndIsSharedTrue(List<LocalDate> weekDates);
 
+    List<Calendar> findByDateAndStartTimeLessThanEqualAndEndTimeGreaterThanEqual(
+            LocalDate date, LocalTime endTime, LocalTime startTime);
 }
