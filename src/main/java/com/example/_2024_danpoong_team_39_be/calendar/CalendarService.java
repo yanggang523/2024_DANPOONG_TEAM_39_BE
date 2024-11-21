@@ -23,11 +23,13 @@ public class CalendarService {
     public List<Calendar> getDailyDetailEvents(LocalDate date, Long id) {
         return calendarRepository.findByDateAndId(date, id);
     }
+
     public Calendar getDailyDetailEventsWithId(Long id) {
         // id로 Calendar를 가져옵니다.
         return calendarRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID의 일정을 찾을 수 없습니다."));
     }
+
     // 일정 추가
     public Calendar addEvent(Calendar calendar) {
         // 주기 설정에 따라 일정 시작 날짜를 자동으로 생성
@@ -45,7 +47,12 @@ public class CalendarService {
             for (LocalDate repeatDate : repeatDates) {
                 Calendar repeatEvent = new Calendar();
                 repeatEvent.setDate(repeatDate);
+                repeatEvent.setEvent_type(calendar.getEvent_type()); // calendar에서 값을 가져와야 함
+                repeatEvent.setStartTime(calendar.getStartTime()); // 추가: startTime 설정
+                repeatEvent.setEndTime(calendar.getEndTime()); // 추가: endTime 설정
                 repeatEvent.setTitle(calendar.getTitle());
+                repeatEvent.setMemo(calendar.getMemo());
+                repeatEvent.setLocation(calendar.getLocation());
                 repeatEvent.setRepeatCycle(calendar.getRepeatCycle());
                 repeatEvent.setIsShared(calendar.getIsShared());
                 repeatEvent.setCategory(calendar.getCategory());
@@ -86,8 +93,8 @@ public class CalendarService {
         List<LocalDate> repeatDates = new ArrayList<>();
         switch (repeatCycle) {
             case WEEKLY:
-                for (int i = 0; i < 7; i++) { // 매주 반복되는 날짜 추가
-                    repeatDates.add(startDate.plusWeeks(i)); // startDate로부터 1주일 간격으로 날짜 추가
+                for (int i = 1; i <= 7; i++) { // 1일부터 7일까지 날짜 추가
+                    repeatDates.add(startDate.plusDays(i - 1)); // startDate로부터 1일부터 7일까지 날짜 추가
                 }
                 break;
             case DAILY:
@@ -103,7 +110,6 @@ public class CalendarService {
         }
         return repeatDates;
     }
-
 
 
     // 공유 일정의 필드를 검증
@@ -152,7 +158,6 @@ public class CalendarService {
     }
 
 
-
     // 세부 일정 수정 (부분 수정, PATCH 요청 사용)
     public Calendar updateEvent(Long id, Calendar updatedCalendar) {
         Optional<Calendar> existingCalendar = calendarRepository.findById(id);
@@ -164,6 +169,9 @@ public class CalendarService {
                 // 기존 일정에서 변경된 필드만 업데이트
                 if (updatedCalendar.getTitle() != null) {
                     calendar.setTitle(updatedCalendar.getTitle());
+                }
+                if(updatedCalendar.getEvent_type() != null){
+                    calendar.setEvent_type(updatedCalendar.getEvent_type());
                 }
                 if (updatedCalendar.getStartTime() != null) {
                     calendar.setStartTime(updatedCalendar.getStartTime());
@@ -274,7 +282,6 @@ public class CalendarService {
     }
 
 
-
     // 세부 일정 삭제
     public boolean deleteEvent(Long id) {
         Optional<Calendar> existingCalendar = calendarRepository.findById(id);
@@ -295,11 +302,16 @@ public class CalendarService {
         // 해당 날짜가 속한 주의 일요일을 구함
         LocalDate startOfWeek = date.with(DayOfWeek.SUNDAY);
 
+        // 한 주 전의 일요일을 구하려면, 일요일을 한 주 빼기
+        startOfWeek = startOfWeek.minusWeeks(1);
+
         // 해당 주의 일요일부터 토요일까지의 날짜 생성
         List<LocalDate> weekDates = new ArrayList<>();
         for (int i = 0; i < 7; i++) {
             weekDates.add(startOfWeek.plusDays(i));
         }
+
+        System.out.println("Previous Week Dates: " + weekDates);
 
         // 해당 주간의 일정을 조회
         return calendarRepository.findByDateIn(weekDates);
