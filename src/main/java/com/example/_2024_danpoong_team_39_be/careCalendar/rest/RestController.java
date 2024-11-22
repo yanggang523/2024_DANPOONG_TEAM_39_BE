@@ -28,7 +28,7 @@ public class RestController {
             calendar.setIsShared(true);
         }
         if (calendar.getCategory() == null || calendar.getCategory().isEmpty()) {
-            calendar.setCategory("Rest");
+            calendar.setCategory("rest");
         }
         return calendarService.addEvent(calendar);
     }

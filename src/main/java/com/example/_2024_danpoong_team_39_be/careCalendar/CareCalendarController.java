@@ -13,6 +13,11 @@ import java.util.List;
 public class CareCalendarController {
     @Autowired
     private CareCalendarService careCalendarService;
+    // isShared가 true인 모든 일정 조회
+    @GetMapping("/all")
+    public List<Calendar> getAllSharedCareCalendarEvents() {
+        return careCalendarService.getAllSharedCalendars();
+    }
     //일일 공유 일정
     @GetMapping("/daily/{date}")
     public List<Calendar> getCareEventsByDate(@PathVariable LocalDate date) {
