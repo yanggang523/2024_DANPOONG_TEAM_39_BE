@@ -41,6 +41,7 @@ public class AuthService {
         // header에 넣어 사용자 로그인용 토큰 생성
         String token = jwtUtil.createAccessToken(member.getEmail());
         httpServletResponse.setHeader("Authorization", token);
+        log.info("사용자 로그인용 토큰:"+token);
 
         return member;
 

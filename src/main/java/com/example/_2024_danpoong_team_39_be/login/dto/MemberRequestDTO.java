@@ -21,20 +21,20 @@ public class MemberRequestDTO {
         private int age;
         private Gender gender;
         private String email;
-        private upLoadProfile profileImage;
+//        private upLoadProfile profileImage;
 
         public FillupRequestDTO() {
         }
 
         public FillupRequestDTO(
-                Long id, String name, String alias, int age, Gender gender, String email, upLoadProfile profileImage) {
+                Long id, String name, String alias, int age, Gender gender, String email) {
             this.id = id;
             this.name = name;
             this.alias = alias;
             this.age = age;
             this.gender = gender;
             this.email = email;
-            this.profileImage = profileImage;
+//            this.profileImage = profileImage;
         }
 
 
@@ -47,10 +47,12 @@ public class MemberRequestDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class UpdateInfoRequestDTO {
+        private Long id;
+        private String name;
         private String alias;
         private int age;
         private Gender gender;
-        private String profileImage;
+//        private String profileImage;
     }
 
 
