@@ -28,7 +28,7 @@ public class MealController {
         }
         // 카테고리가 비어있으면 "Meal"로 설정
         if (calendar.getCategory() == null || calendar.getCategory().isEmpty()) {
-            calendar.setCategory("Meal");
+            calendar.setCategory("meal");
         }
         return calendarService.addEvent(calendar);
     }

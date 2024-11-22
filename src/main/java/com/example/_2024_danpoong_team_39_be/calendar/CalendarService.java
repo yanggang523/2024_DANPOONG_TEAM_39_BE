@@ -23,13 +23,20 @@ public class CalendarService {
     public List<Calendar> getDailyDetailEvents(LocalDate date, Long id) {
         return calendarRepository.findByDateAndId(date, id);
     }
+
     public Calendar getDailyDetailEventsWithId(Long id) {
         // id로 Calendar를 가져옵니다.
         return calendarRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID의 일정을 찾을 수 없습니다."));
     }
+
     // 일정 추가
     public Calendar addEvent(Calendar calendar) {
+        // 시간 충돌 검사
+        if (isTimeConflict(calendar)) {
+            throw new IllegalArgumentException("해당 시간대에 이미 일정이 존재합니다.");
+        }
+
         // 주기 설정에 따라 일정 시작 날짜를 자동으로 생성
         if (calendar.getRepeatCycle() != null) {
             LocalDate startDate = calendar.getDate(); // startDate 가져오기
@@ -45,7 +52,12 @@ public class CalendarService {
             for (LocalDate repeatDate : repeatDates) {
                 Calendar repeatEvent = new Calendar();
                 repeatEvent.setDate(repeatDate);
+                repeatEvent.setEvent_type(calendar.getEvent_type()); // calendar에서 값을 가져와야 함
+                repeatEvent.setStartTime(calendar.getStartTime()); // 추가: startTime 설정
+                repeatEvent.setEndTime(calendar.getEndTime()); // 추가: endTime 설정
                 repeatEvent.setTitle(calendar.getTitle());
+                repeatEvent.setMemo(calendar.getMemo());
+                repeatEvent.setLocation(calendar.getLocation());
                 repeatEvent.setRepeatCycle(calendar.getRepeatCycle());
                 repeatEvent.setIsShared(calendar.getIsShared());
                 repeatEvent.setCategory(calendar.getCategory());
@@ -53,6 +65,11 @@ public class CalendarService {
                 repeatEvent.setHospital(calendar.getHospital());
                 repeatEvent.setRest(calendar.getRest());
                 repeatEvent.setMedication(calendar.getMedication());
+
+                // 시간 충돌 검사
+                if (isTimeConflict(repeatEvent)) {
+                    throw new IllegalArgumentException("반복 일정 중 일부가 이미 존재하는 일정과 겹칩니다.");
+                }
 
                 // 반복 일정 저장
                 calendarRepository.save(repeatEvent);
@@ -81,13 +98,21 @@ public class CalendarService {
         return calendar;  // 추가된 일정 객체를 반환
     }
 
+    // 시간 충돌 검사 메서드
+    private boolean isTimeConflict(Calendar calendar) {
+        List<Calendar> conflictingEvents = calendarRepository.findByDateAndStartTimeLessThanEqualAndEndTimeGreaterThanEqual(
+                calendar.getDate(), calendar.getEndTime(), calendar.getStartTime());
+        return !conflictingEvents.isEmpty();
+    }
+
+
     // 반복 주기에 따라 날짜 리스트 생성
     private List<LocalDate> generateRepeatDates(LocalDate startDate, Calendar.RepeatCycle repeatCycle) {
         List<LocalDate> repeatDates = new ArrayList<>();
         switch (repeatCycle) {
             case WEEKLY:
-                for (int i = 0; i < 7; i++) { // 매주 반복되는 날짜 추가
-                    repeatDates.add(startDate.plusWeeks(i)); // startDate로부터 1주일 간격으로 날짜 추가
+                for (int i = 1; i <= 7; i++) { // 1일부터 7일까지 날짜 추가
+                    repeatDates.add(startDate.plusDays(i - 1)); // startDate로부터 1일부터 7일까지 날짜 추가
                 }
                 break;
             case DAILY:
@@ -105,7 +130,6 @@ public class CalendarService {
     }
 
 
-
     // 공유 일정의 필드를 검증
     private void validateSharedEventFields(Calendar calendar) {
         if (calendar.getCategory() == null) {
@@ -114,27 +138,30 @@ public class CalendarService {
 
         // 카테고리별 필드 체크
         switch (calendar.getCategory()) {
-            case "Meal":
+            case "meal":
                 if (calendar.getMeal() == null || calendar.getMeal().getMealType() == null) {
                     throw new IllegalArgumentException("Meal 카테고리에는 mealType을 지정해야 합니다.");
                 }
                 break;
-            case "Hospital":
+            case "hospital":
                 if (calendar.getHospital() == null || calendar.getHospital().getTransportationTpye() == null) {
                     throw new IllegalArgumentException("Hospital 카테고리에는 transportationType을 지정해야 합니다.");
                 }
                 break;
-            case "Rest":
+            case "rest":
                 if (calendar.getRest() == null || calendar.getRest().getRestType() == null) {
                     throw new IllegalArgumentException("Rest 카테고리에는 restType을 지정해야 합니다.");
                 }
                 break;
-            case "Medication":
+            case "medication":
                 if (calendar.getMedication() == null || calendar.getMedication().getMedicationType() == null) {
                     throw new IllegalArgumentException("Medication 카테고리에는 medicationType을 지정해야 합니다.");
                 }
                 break;
             case "others":
+                // "others" 카테고리는 제약이 없으므로 추가적인 검증은 없음
+                break;
+            case "myCalendar":
                 // "others" 카테고리는 제약이 없으므로 추가적인 검증은 없음
                 break;
             default:
@@ -152,7 +179,6 @@ public class CalendarService {
     }
 
 
-
     // 세부 일정 수정 (부분 수정, PATCH 요청 사용)
     public Calendar updateEvent(Long id, Calendar updatedCalendar) {
         Optional<Calendar> existingCalendar = calendarRepository.findById(id);
@@ -161,9 +187,17 @@ public class CalendarService {
 
             // 날짜가 일치하는 경우에만 수정
             if (calendar.getId().equals(id)) {
+                // 시간 충돌 검사
+                if (isTimeConflict(updatedCalendar, id)) {
+                    throw new IllegalArgumentException("해당 시간대에 이미 일정이 존재합니다.");
+                }
+
                 // 기존 일정에서 변경된 필드만 업데이트
                 if (updatedCalendar.getTitle() != null) {
                     calendar.setTitle(updatedCalendar.getTitle());
+                }
+                if (updatedCalendar.getEvent_type() != null) {
+                    calendar.setEvent_type(updatedCalendar.getEvent_type());
                 }
                 if (updatedCalendar.getStartTime() != null) {
                     calendar.setStartTime(updatedCalendar.getStartTime());
@@ -228,27 +262,30 @@ public class CalendarService {
 
                         // 카테고리별 추가 필드 체크
                         switch (updatedCalendar.getCategory()) {
-                            case "Meal":
+                            case "meal":
                                 if (updatedCalendar.getMeal() == null || updatedCalendar.getMeal().getMealType() == null) {
-                                    throw new IllegalArgumentException("Meal 카테고리일 경우 mealType을 선택해야 합니다.");
+                                    throw new IllegalArgumentException("meal 카테고리일 경우 mealType을 선택해야 합니다.");
                                 }
                                 break;
-                            case "Hospital":
+                            case "hospital":
                                 if (updatedCalendar.getHospital() == null || updatedCalendar.getHospital().getTransportationTpye() == null) {
-                                    throw new IllegalArgumentException("Hospital 카테고리일 경우 transportationMethod을 선택해야 합니다.");
+                                    throw new IllegalArgumentException("hospital 카테고리일 경우 transportationMethod을 선택해야 합니다.");
                                 }
                                 break;
-                            case "Rest":
+                            case "rest":
                                 if (updatedCalendar.getRest() == null || updatedCalendar.getRest().getRestType() == null) {
-                                    throw new IllegalArgumentException("Rest 카테고리일 경우 restType을 선택해야 합니다.");
+                                    throw new IllegalArgumentException("rest 카테고리일 경우 restType을 선택해야 합니다.");
                                 }
                                 break;
-                            case "Medication":
+                            case "medication":
                                 if (updatedCalendar.getMedication() == null || updatedCalendar.getMedication().getMedicationType() == null) {
-                                    throw new IllegalArgumentException("Medication 카테고리일 경우 medicationType을 선택해야 합니다.");
+                                    throw new IllegalArgumentException("medication 카테고리일 경우 medicationType을 선택해야 합니다.");
                                 }
                                 break;
                             case "others":
+                                // "others" 카테고리는 제약이 없으므로 추가적인 검증은 없음
+                                break;
+                            case "myCalendar":
                                 // "others" 카테고리는 제약이 없으므로 추가적인 검증은 없음
                                 break;
                             default:
@@ -273,6 +310,15 @@ public class CalendarService {
         return null;
     }
 
+    // 시간 충돌 검사 메서드
+    private boolean isTimeConflict(Calendar calendar, Long id) {
+        List<Calendar> conflictingEvents = calendarRepository.findByDateAndStartTimeLessThanEqualAndEndTimeGreaterThanEqual(
+                calendar.getDate(), calendar.getEndTime(), calendar.getStartTime());
+
+        // 현재 일정(id)을 제외한 일정들 중에 충돌이 있는지 확인
+        return conflictingEvents.stream().anyMatch(event -> !event.getId().equals(id));
+    }
+
 
 
     // 세부 일정 삭제
@@ -295,11 +341,16 @@ public class CalendarService {
         // 해당 날짜가 속한 주의 일요일을 구함
         LocalDate startOfWeek = date.with(DayOfWeek.SUNDAY);
 
+        // 한 주 전의 일요일을 구하려면, 일요일을 한 주 빼기
+        startOfWeek = startOfWeek.minusWeeks(1);
+
         // 해당 주의 일요일부터 토요일까지의 날짜 생성
         List<LocalDate> weekDates = new ArrayList<>();
         for (int i = 0; i < 7; i++) {
             weekDates.add(startOfWeek.plusDays(i));
         }
+
+        System.out.println("Previous Week Dates: " + weekDates);
 
         // 해당 주간의 일정을 조회
         return calendarRepository.findByDateIn(weekDates);

@@ -4,13 +4,16 @@ package com.example._2024_danpoong_team_39_be.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 // Member domain
 @Setter
 @Entity
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
+//@AllArgsConstructor
 public class Member {
 
     @Id
@@ -31,15 +34,24 @@ public class Member {
     @Column(nullable = false, length = 50)
     private String email;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    private upLoadProfile profileImage;
 
-    public Member(String name, String alias, int age, Gender gender, int phone_num, String email, upLoadProfile profileImage) {
+    @ManyToOne
+    @JoinColumn(name = "care_assignment_id") // CareAssignment에 속함
+    private CareAssignment careAssignment;
+
+//    이미지 받기 구현 생략
+//    @OneToOne(cascade = CascadeType.ALL)
+//    private upLoadProfile profileImage;
+
+    public Member(Long id, String name, String alias, int age, Gender gender, String email, CareAssignment careAssignment) {
+        this.id = id;
         this.name = name;
         this.alias = alias;
         this.age = age;
         this.gender = gender;
         this.email = email;
+        this.careAssignment = careAssignment;
+
     }
 
 
