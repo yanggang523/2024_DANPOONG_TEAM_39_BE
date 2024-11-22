@@ -22,21 +22,5 @@ public class MemberConverter {
                 .build();
     }
 
-    //회원가입 값 받아서 저장할 용도로 변환
-    @Builder
-    public static Member toMember(MemberRequestDTO.FillupRequestDTO member) {
-        if (member == null) {
-            return null;
-        }
-
-        return MemberRequestDTO.FillupRequestDTO.builder()
-                .name(member.getName())
-                .alias(member.getAlias())
-                .age(member.getAge())
-                .gender(member.getGender())
-                .email(member.getEmail())
-                .profileImage(member.getProfileImage())
-                .build();
-    }
 }
 

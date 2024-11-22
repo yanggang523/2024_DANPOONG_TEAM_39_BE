@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 // Member domain
-
+@Setter
 @Entity
 @Getter
 @Builder

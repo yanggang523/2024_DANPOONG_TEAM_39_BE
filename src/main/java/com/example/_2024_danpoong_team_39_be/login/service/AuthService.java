@@ -11,7 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
-
+import com.example._2024_danpoong_team_39_be.login.dto.MemberRequestDTO;
 
 @Slf4j
 @Service
@@ -58,6 +58,25 @@ public class AuthService {
         return memberRepository.save(newMember);
     }
 
+    // 회원 추가정보 입력
+    public Member updateAdditionalInfo(String token, MemberRequestDTO.UpdateInfoRequestDTO updateInfo) {
+        // 토큰에서 이메일 추출
+        String email = jwtUtil.getEmailFromToken(token);
+
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException(email +"해당 이메일을 사용하는 유저를 찾을 수 없습니다."));
+
+        // 사용자 정보 업데이트
+        if (updateInfo.getAlias() != null) member.setAlias(updateInfo.getAlias());
+        if (updateInfo.getAge() > 0) member.setAge(updateInfo.getAge());
+        if (updateInfo.getGender() != null) member.setGender(updateInfo.getGender());
+
+//        이미지 저장 (개발 보류)
+     //   if (updateInfo.getProfileImage() != null) member.setProfileImage(updateInfo.getProfileImage());
+
+        // 저장
+        return memberRepository.save(member);
+    }
 
 }
 

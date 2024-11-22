@@ -3,9 +3,7 @@ package com.example._2024_danpoong_team_39_be.login.dto;
 
 import com.example._2024_danpoong_team_39_be.domain.Gender;
 import com.example._2024_danpoong_team_39_be.domain.upLoadProfile;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
@@ -40,6 +38,19 @@ public class MemberRequestDTO {
         }
 
 
+    }
+
+
+    @Getter
+    @Setter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UpdateInfoRequestDTO {
+        private String alias;
+        private int age;
+        private Gender gender;
+        private String profileImage;
     }
 
 
