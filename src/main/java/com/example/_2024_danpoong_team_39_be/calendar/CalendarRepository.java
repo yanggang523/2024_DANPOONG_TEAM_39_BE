@@ -1,20 +1,17 @@
 package com.example._2024_danpoong_team_39_be.calendar;
 
+import com.example._2024_danpoong_team_39_be.domain.CareAssignment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CalendarRepository extends JpaRepository<Calendar, Long> {
-    List<Calendar> findByDate(LocalDate date);
 
-    List<Calendar> findByDateAndId(LocalDate date, Long id);
-    //돌보미 일정 주간 조회
-
-    List<Calendar> findByDateIn(List<LocalDate> weekDates);
 
     // isShared가 true인 일정만 날짜별로 조회
     List<Calendar> findByDateAndIsSharedTrue(LocalDate date);
@@ -26,4 +23,12 @@ public interface CalendarRepository extends JpaRepository<Calendar, Long> {
             LocalDate date, LocalTime endTime, LocalTime startTime);
     // isShared가 true인 모든 일정 조회
     List<Calendar> findByIsSharedTrue();
+
+    // CareAssignmentId로 Calendar를 조회하는 메서드
+    List<Calendar> findCalendarByCareAssignmentId(Long careAssignmentId);
+
+    List<Calendar> findCalendarByCareAssignmentIdAndDate(Long careAssignmentId, LocalDate date);
+
+    List<Calendar> findByDateAndId(LocalDate date, Long id);
+
 }
