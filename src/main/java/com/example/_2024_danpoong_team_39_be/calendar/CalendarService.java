@@ -138,22 +138,22 @@ public class CalendarService {
 
         // 카테고리별 필드 체크
         switch (calendar.getCategory()) {
-            case "Meal":
+            case "meal":
                 if (calendar.getMeal() == null || calendar.getMeal().getMealType() == null) {
                     throw new IllegalArgumentException("Meal 카테고리에는 mealType을 지정해야 합니다.");
                 }
                 break;
-            case "Hospital":
+            case "hospital":
                 if (calendar.getHospital() == null || calendar.getHospital().getTransportationTpye() == null) {
                     throw new IllegalArgumentException("Hospital 카테고리에는 transportationType을 지정해야 합니다.");
                 }
                 break;
-            case "Rest":
+            case "rest":
                 if (calendar.getRest() == null || calendar.getRest().getRestType() == null) {
                     throw new IllegalArgumentException("Rest 카테고리에는 restType을 지정해야 합니다.");
                 }
                 break;
-            case "Medication":
+            case "medication":
                 if (calendar.getMedication() == null || calendar.getMedication().getMedicationType() == null) {
                     throw new IllegalArgumentException("Medication 카테고리에는 medicationType을 지정해야 합니다.");
                 }
@@ -262,24 +262,24 @@ public class CalendarService {
 
                         // 카테고리별 추가 필드 체크
                         switch (updatedCalendar.getCategory()) {
-                            case "Meal":
+                            case "meal":
                                 if (updatedCalendar.getMeal() == null || updatedCalendar.getMeal().getMealType() == null) {
-                                    throw new IllegalArgumentException("Meal 카테고리일 경우 mealType을 선택해야 합니다.");
+                                    throw new IllegalArgumentException("meal 카테고리일 경우 mealType을 선택해야 합니다.");
                                 }
                                 break;
-                            case "Hospital":
+                            case "hospital":
                                 if (updatedCalendar.getHospital() == null || updatedCalendar.getHospital().getTransportationTpye() == null) {
-                                    throw new IllegalArgumentException("Hospital 카테고리일 경우 transportationMethod을 선택해야 합니다.");
+                                    throw new IllegalArgumentException("hospital 카테고리일 경우 transportationMethod을 선택해야 합니다.");
                                 }
                                 break;
-                            case "Rest":
+                            case "rest":
                                 if (updatedCalendar.getRest() == null || updatedCalendar.getRest().getRestType() == null) {
-                                    throw new IllegalArgumentException("Rest 카테고리일 경우 restType을 선택해야 합니다.");
+                                    throw new IllegalArgumentException("rest 카테고리일 경우 restType을 선택해야 합니다.");
                                 }
                                 break;
-                            case "Medication":
+                            case "medication":
                                 if (updatedCalendar.getMedication() == null || updatedCalendar.getMedication().getMedicationType() == null) {
-                                    throw new IllegalArgumentException("Medication 카테고리일 경우 medicationType을 선택해야 합니다.");
+                                    throw new IllegalArgumentException("medication 카테고리일 경우 medicationType을 선택해야 합니다.");
                                 }
                                 break;
                             case "others":

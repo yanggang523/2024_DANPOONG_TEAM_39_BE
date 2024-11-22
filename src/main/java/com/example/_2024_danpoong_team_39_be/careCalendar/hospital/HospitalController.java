@@ -29,7 +29,7 @@ public class HospitalController {
             calendar.setIsShared(true);
         }
         if (calendar.getCategory() == null || calendar.getCategory().isEmpty()) {
-            calendar.setCategory("Hospital");
+            calendar.setCategory("hospital");
         }
         return calendarService.addEvent(calendar);
     }
