@@ -28,18 +28,17 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @Column(nullable = false, unique = true)
-    private int phone_num;
-
     @Column(nullable = false, length = 50)
     private String email;
 
-    public Member(String name, int age, Gender gender, int phone_num) {
+    @OneToOne(cascade = CascadeType.ALL)
+    private upLoadProfile profileImage;
+
+    public Member(String name, String alias, int age, Gender gender, int phone_num, String email, upLoadProfile profileImage) {
         this.name = name;
         this.alias = alias;
         this.age = age;
         this.gender = gender;
-        this.phone_num = phone_num;
         this.email = email;
     }
 

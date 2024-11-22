@@ -2,7 +2,10 @@ package com.example._2024_danpoong_team_39_be.login.converter;
 
 
 import com.example._2024_danpoong_team_39_be.domain.Member;
+import com.example._2024_danpoong_team_39_be.login.dto.MemberRequestDTO;
 import com.example._2024_danpoong_team_39_be.login.dto.MemberResponseDTO;
+import lombok.Builder;
+
 
 public class MemberConverter {
 
@@ -16,6 +19,23 @@ public class MemberConverter {
                 .id(member.getId())
                 .email(member.getEmail())
                 .alias(member.getAlias())
+                .build();
+    }
+
+    //회원가입 값 받아서 저장할 용도로 변환
+    @Builder
+    public static Member toMember(MemberRequestDTO.FillupRequestDTO member) {
+        if (member == null) {
+            return null;
+        }
+
+        return MemberRequestDTO.FillupRequestDTO.builder()
+                .name(member.getName())
+                .alias(member.getAlias())
+                .age(member.getAge())
+                .gender(member.getGender())
+                .email(member.getEmail())
+                .profileImage(member.getProfileImage())
                 .build();
     }
 }
