@@ -1,6 +1,5 @@
 package com.example._2024_danpoong_team_39_be.login.service;
 
-import com.example._2024_danpoong_team_39_be.domain.CalendarStrap;
 import com.example._2024_danpoong_team_39_be.domain.CareRecipient;
 import com.example._2024_danpoong_team_39_be.domain.Member;
 import com.example._2024_danpoong_team_39_be.login.converter.CareRecipientConverter;
@@ -9,11 +8,12 @@ import com.example._2024_danpoong_team_39_be.login.repository.CareRecipientRepos
 import com.example._2024_danpoong_team_39_be.login.repository.MemberRepository;
 import com.example._2024_danpoong_team_39_be.login.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
-import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CareRecipentService {
@@ -42,11 +42,11 @@ public class CareRecipentService {
                 careRecipientProfile.getAvg_sleep_time()
         );
 
-        // CalendarStrap 생성 (정적 팩토리 메서드 사용)
-        CalendarStrap calendarStrap = CalendarStrap.create(newCareRecipient, Collections.singletonList(member));
-
-        // Member와 CalendarStrap의 연관 관계 설정
-        member.setCalendarStrap(calendarStrap);
+//        // CalendarStrap 생성 (정적 팩토리 메서드 사용)
+//        CalendarStrap calendarStrap = CalendarStrap.create(newCareRecipient, Collections.singletonList(member));
+//
+//        // Member와 CalendarStrap의 연관 관계 설정
+//        member.setCalendarStrap(calendarStrap);
 
         // 모든 데이터 저장
         careRecipientRepository.save(newCareRecipient);

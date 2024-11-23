@@ -4,9 +4,6 @@ package com.example._2024_danpoong_team_39_be.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 // Member domain
 @Setter
 @Entity
@@ -42,11 +39,8 @@ public class Member {
 //    @OneToOne(cascade = CascadeType.ALL)
 //    private upLoadProfile profileImage;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "calendar_strap_id")
-    private CalendarStrap calendarStrap;
 
-    public Member(Long id, String name, String alias, int age, Gender gender, String email, CareAssignment careAssignment, CalendarStrap calendarStrap) {
+    public Member(Long id, String name, String alias, int age, Gender gender, String email, CareAssignment careAssignment) {
         this.id = id;
         this.name = name;
         this.alias = alias;
@@ -54,7 +48,6 @@ public class Member {
         this.gender = gender;
         this.email = email;
         this.careAssignment = careAssignment;
-        this.calendarStrap = calendarStrap;
 
 
 

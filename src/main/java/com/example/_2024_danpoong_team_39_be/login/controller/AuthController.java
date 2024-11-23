@@ -2,6 +2,8 @@ package com.example._2024_danpoong_team_39_be.login.controller;
 
 
 
+import com.example._2024_danpoong_team_39_be.domain.CareRecipient;
+import com.example._2024_danpoong_team_39_be.login.converter.CareRecipientConverter;
 import com.example._2024_danpoong_team_39_be.login.dto.CareRecipientDTO;
 import com.example._2024_danpoong_team_39_be.login.dto.FillupResultDTO;
 import com.example._2024_danpoong_team_39_be.login.service.AuthService;
@@ -10,6 +12,7 @@ import com.example._2024_danpoong_team_39_be.login.converter.MemberConverter;
 import com.example._2024_danpoong_team_39_be.domain.Member;
 import com.example._2024_danpoong_team_39_be.login.dto.MemberRequestDTO;
 import com.example._2024_danpoong_team_39_be.login.dto.MemberResponseDTO;
+import com.example._2024_danpoong_team_39_be.login.service.CareRecipentService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +26,7 @@ public class AuthController {
 
     private final AuthService authService;
 
-    // 멤버 추갖 ㅓㅇ보 입력
+    // 멤버 추가 정보 입력
     @PutMapping("api/member/signup/fillup")
     public ResponseEntity<FillupResultDTO> updateAdditionalInfo(
             @RequestHeader("Authorization") String token,
@@ -42,9 +45,9 @@ public class AuthController {
     }
 
     // 최초 돌봄가족 입력 (토큰 요청 후 로그인)
-    @GetMapping("/api/care_recipient/{member_id}")
+    @PostMapping("/api/care_recipient/{member_id}")
     public BaseResponse<CareRecipientDTO> CareRecipientFillup(){
-
-        return null;
+        CareRecipient careRecipient = CareRecipentService.createCareRecipient;
+        return BaseResponse.onSuccess(CareRecipientConverter.toCareRecipient(newCareRecipient));
     }
 }
