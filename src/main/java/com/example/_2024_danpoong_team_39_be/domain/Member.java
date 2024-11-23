@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 // Member domain
-
+@Setter
 @Entity
 @Getter
 @Builder
@@ -42,13 +42,15 @@ public class Member {
 //    @OneToOne(cascade = CascadeType.ALL)
 //    private upLoadProfile profileImage;
 
-    public Member(Long id, String name, String alias, int age, Gender gender, String phoneNum, CareAssignment careAssignment) {
+    public Member(Long id, String name, String alias, int age, Gender gender, String email, CareAssignment careAssignment) {
         this.id = id;
         this.name = name;
         this.alias = alias;
         this.age = age;
         this.gender = gender;
+        this.email = email;
         this.careAssignment = careAssignment;
+
     }
 
 
