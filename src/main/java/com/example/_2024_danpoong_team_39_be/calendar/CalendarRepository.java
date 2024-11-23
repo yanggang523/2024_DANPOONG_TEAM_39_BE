@@ -19,8 +19,6 @@ public interface CalendarRepository extends JpaRepository<Calendar, Long> {
     // isShared가 true이고 startDate가 특정 주의 날짜 리스트에 포함된 일정 조회
     List<Calendar> findByDateInAndIsSharedTrue(List<LocalDate> weekDates);
 
-    List<Calendar> findByDateAndStartTimeLessThanEqualAndEndTimeGreaterThanEqual(
-            LocalDate date, LocalTime endTime, LocalTime startTime);
     // isShared가 true인 모든 일정 조회
     List<Calendar> findByIsSharedTrue();
 
@@ -31,4 +29,5 @@ public interface CalendarRepository extends JpaRepository<Calendar, Long> {
 
     List<Calendar> findByDateAndId(LocalDate date, Long id);
 
+    List<Calendar> findByDateAndStartTimeLessThanAndEndTimeGreaterThan(LocalDate date, LocalTime adjustedEndTime, LocalTime adjustedStartTime);
 }

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 public class MealController {
     @Autowired
     private CalendarService careAssignmentService;  // Service 사용
-
+    private Meal meal;
 
 //    // 특정 날짜의 세부 일정 조회
 //    @GetMapping("/{calendar_id}")
@@ -28,6 +28,9 @@ public class MealController {
             }
             if (calendar.getCategory() == null || calendar.getCategory().isEmpty()) {
                 calendar.setCategory("meal");
+            }
+            if(meal.isCaregiver() == false){
+                calendar.setName("지정되지 않음");
             }
             Calendar savedCalendar = careAssignmentService.addEvent(calendar);
             return ResponseEntity.ok(savedCalendar);

@@ -13,7 +13,7 @@ public class MedicationController {
     @Autowired
     private CalendarService careAssignmentService;  // Service 사용
 
-
+    private Medication medication;
 //    // 특정 날짜의 세부 일정 조회
 //    @GetMapping("/{calendar_id}")
 //    public Calendar getDailyDetailEvents(@PathVariable Long calendar_id) {
@@ -29,6 +29,8 @@ public class MedicationController {
             }
             if (calendar.getCategory() == null || calendar.getCategory().isEmpty()) {
                 calendar.setCategory("medication");
+            }if(medication.isCaregiver() == false){
+                calendar.setName("지정되지 않음");
             }
             Calendar savedCalendar = careAssignmentService.addEvent(calendar);
             return ResponseEntity.ok(savedCalendar);

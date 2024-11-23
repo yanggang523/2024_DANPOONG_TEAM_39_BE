@@ -20,8 +20,9 @@ public class CareAssignment {
     @OneToMany(mappedBy = "careAssignment", fetch = FetchType.LAZY)
     private List<Calendar> calendars;
 
-    @OneToMany(mappedBy = "careAssignment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Member> members = new ArrayList<>();
+    @OneToOne(mappedBy = "careAssignment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Member member;
+
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipient", nullable = false)
@@ -30,9 +31,9 @@ public class CareAssignment {
     @Column(length=50)
     private String relationship;
 
-    public CareAssignment(Long id, List<Member> members, CareRecipient recipient, String relationship) {
+    public CareAssignment(Long id, Member member, CareRecipient recipient, String relationship) {
         this.id = id;
-        this.members = members;
+        this.member = member;
         this.recipient = recipient;
         this.relationship = relationship;
     }

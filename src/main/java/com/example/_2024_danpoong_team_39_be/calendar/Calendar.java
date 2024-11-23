@@ -25,7 +25,6 @@ public class Calendar {
 
     @Column(nullable = false)
     private String title; // 일정 제목
-    @Column(nullable = false)
     private String eventType; // 일정타입 공부, 팀플 등등
     @Column(nullable = false)
     private LocalTime startTime; // 시작 시간
@@ -34,9 +33,8 @@ public class Calendar {
     @Column(nullable = false)
     private LocalDate date;// 날짜
     @Enumerated(EnumType.STRING)
-
     private RepeatCycle repeatCycle;
-    private Boolean isAllday = false;
+    private Boolean isAllday;
     private Boolean isAlarm; // 알림 여부
     private String location; // 위치
     private String memo; // 메모
@@ -71,4 +69,9 @@ public class Calendar {
     @JoinColumn(name = "care_assignment_id")
     @JsonIgnore
     private CareAssignment careAssignment; // CareAssignment와의 관계
+
+    //돌보미 등록
+    private String name;
+
+
 }

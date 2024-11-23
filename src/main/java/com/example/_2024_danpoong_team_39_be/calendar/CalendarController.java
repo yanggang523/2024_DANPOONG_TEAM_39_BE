@@ -16,17 +16,17 @@ public class CalendarController {
 
     @Autowired
     private CalendarRepository calendarRepository;
-    // 특정 날짜의 세부 일정 조회
-    @GetMapping("/{date}/{eventId}")
+    // 특정 날짜의 세부 일정 조회(1개) 작동 o
+    @GetMapping("/{date}/events/{eventId}")
     public List<Calendar> getDailyDetailEvents(@PathVariable LocalDate date, @PathVariable Long eventId) {
         return careAssignmentService.getDailyDetailEvents(date, eventId);
     }
-    // 특정 날짜의 일정 리스트 조회
+    // 특정 날짜의 일정 리스트 조회(ex 2024-11-23에 있는 모든 a의 일정)
     @GetMapping("/{careAssignmentId}/{date}")
     public List<Calendar> getDailyEventsForMembers(@RequestParam Long careAssignmentId, @PathVariable LocalDate date) {
         return careAssignmentService.getDailyEventsForMembers(careAssignmentId, date);
     }
-    // 회원별로 일정 리스트 조회
+    // 회원별로 일정 리스트 조회 회원 아이디를
     @GetMapping("/{careAssignmentId}/events")
     public ResponseEntity<List<Calendar>> getEventsByMember(@PathVariable Long careAssignmentId) {
         // 해당 회원의 일정을 조회

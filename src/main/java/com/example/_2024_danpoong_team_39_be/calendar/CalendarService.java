@@ -2,6 +2,7 @@ package com.example._2024_danpoong_team_39_be.calendar;
 
 import com.example._2024_danpoong_team_39_be.careAssignment.CareAssignmentRepository;
 import com.example._2024_danpoong_team_39_be.domain.CareAssignment;
+import com.example._2024_danpoong_team_39_be.domain.CareRecipient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,11 +39,11 @@ public class CalendarService {
         if (isTimeConflict(calendar)) {
             throw new IllegalArgumentException("해당 시간대에 이미 일정이 존재합니다.");
         }
-        // 기본값 확인 및 24시간 일정 설정
+        // 종일선택시 starttime  수면시작시간 , endTime - 수면종료시간
 
         if (Boolean.TRUE.equals(calendar.getIsAllday())) {
-            calendar.setStartTime(LocalTime.of(0, 0)); // 00:00
-            calendar.setEndTime(LocalTime.of(23, 59)); // 23:59
+            calendar.setStartTime(calendar.getCareAssignment().getRecipient().getStartSleepTime());
+            calendar.setEndTime(calendar.getCareAssignment().getRecipient().getEndSleepTime());
         }
 
         // 주기 설정에 따라 일정 시작 날짜를 자동으로 생성
@@ -60,9 +61,11 @@ public class CalendarService {
             for (LocalDate repeatDate : repeatDates) {
                 Calendar repeatEvent = new Calendar();
                 repeatEvent.setDate(repeatDate);
+                repeatEvent.setName(calendar.getName());
                 repeatEvent.setEventType(calendar.getEventType());
                 repeatEvent.setStartTime(calendar.getStartTime());
                 repeatEvent.setEndTime(calendar.getEndTime());
+                repeatEvent.setName(calendar.getCareAssignment().getMember().getAlias());
                 repeatEvent.setTitle(calendar.getTitle());
                 repeatEvent.setIsAllday(calendar.getIsAllday());
                 repeatEvent.setMemo(calendar.getMemo());
@@ -112,12 +115,15 @@ public class CalendarService {
     }
 
     // 시간 충돌 검사 메서드
-    public boolean isTimeConflict(Calendar calendar) {
-        List<Calendar> conflictingEvents = calendarRepository.findByDateAndStartTimeLessThanEqualAndEndTimeGreaterThanEqual(
-                calendar.getDate(), calendar.getEndTime(), calendar.getStartTime());
+    private boolean isTimeConflict(Calendar calendar) {
+        LocalTime adjustedStartTime = calendar.getStartTime();
+        LocalTime adjustedEndTime = calendar.getEndTime();
 
+        List<Calendar> conflictingEvents = calendarRepository.findByDateAndStartTimeLessThanAndEndTimeGreaterThan(
+                calendar.getDate(), adjustedEndTime, adjustedStartTime);
         return !conflictingEvents.isEmpty();
     }
+
 
     // 반복 주기에 따라 날짜 리스트 생성
     private List<LocalDate> generateRepeatDates(LocalDate startDate, Calendar.RepeatCycle repeatCycle) {
@@ -169,6 +175,7 @@ public class CalendarService {
                 }
                 break;
             case "others":
+                break;
             case "myCalendar":
                 break;
             default:

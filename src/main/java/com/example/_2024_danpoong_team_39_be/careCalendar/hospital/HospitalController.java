@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 public class HospitalController {
     @Autowired
     private CalendarService careAssignmentService;  // Service 사용
-
+    private Hospital hospital;
 
     // 특정 날짜의 일정 추가
     @PostMapping("")
@@ -23,6 +23,9 @@ public class HospitalController {
             }
             if (calendar.getCategory() == null || calendar.getCategory().isEmpty()) {
                 calendar.setCategory("hospital");
+            }
+            if(hospital.isCaregiver() == false){
+                calendar.setName("지정되지 않음");
             }
             Calendar savedCalendar = careAssignmentService.addEvent(calendar);
             return ResponseEntity.ok(savedCalendar);

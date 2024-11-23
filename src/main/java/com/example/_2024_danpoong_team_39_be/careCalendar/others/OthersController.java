@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 public class OthersController {
     @Autowired
     private CalendarService careAssignmentService;  // Service 사용
-
+    private Others others;
 //
 //    // 특정 날짜의 세부 일정 조회
 //    @GetMapping("/{calendar_id}")
@@ -30,6 +30,9 @@ public class OthersController {
             }
             if (calendar.getCategory() == null || calendar.getCategory().isEmpty()) {
                 calendar.setCategory("others");
+            }
+            if(others.isCaregiver() == false){
+                calendar.setName("지정되지 않음");
             }
             Calendar savedCalendar = careAssignmentService.addEvent(calendar);
             return ResponseEntity.ok(savedCalendar);
