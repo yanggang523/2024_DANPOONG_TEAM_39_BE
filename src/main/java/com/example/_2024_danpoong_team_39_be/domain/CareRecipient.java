@@ -9,7 +9,9 @@ import java.time.LocalTime;
 @Getter
 @Setter
 @Entity
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class CareRecipient {
 
     @Id
@@ -45,8 +47,8 @@ public class CareRecipient {
     // 프로필 이미지 없습니다! (추후 추가 예정)
 
     public CareRecipient(
-            Long careRecipientId, String name, String diagnosis, String mobilityStatus, LocalTime startSleepTime, LocalTime endSleepTime, String address, LocalTime avgSleepTime) {
-        this.careRecipientId = careRecipientId;
+            Long id, String name, String diagnosis, String mobilityStatus, LocalTime startSleepTime, LocalTime endSleepTime, String address, LocalTime avgSleepTime) {
+        this.careRecipientId = id;
         this.name = name;
         this.diagnosis = diagnosis;
         this.mobilityStatus = mobilityStatus;

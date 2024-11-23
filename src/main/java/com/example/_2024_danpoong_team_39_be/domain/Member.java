@@ -43,7 +43,11 @@ public class Member {
 //    @OneToOne(cascade = CascadeType.ALL)
 //    private upLoadProfile profileImage;
 
-    public Member(Long id, String name, String alias, int age, Gender gender, String email, CareAssignment careAssignment) {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "calendar_strap_id")
+    private CalendarStrap calendarStrap;
+
+    public Member(Long id, String name, String alias, int age, Gender gender, String email, CareAssignment careAssignment, CalendarStrap calendarStrap) {
         this.id = id;
         this.name = name;
         this.alias = alias;
@@ -51,6 +55,9 @@ public class Member {
         this.gender = gender;
         this.email = email;
         this.careAssignment = careAssignment;
+        this.calendarStrap = calendarStrap;
+
+
 
     }
 
