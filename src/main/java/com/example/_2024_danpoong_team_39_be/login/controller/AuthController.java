@@ -2,6 +2,9 @@ package com.example._2024_danpoong_team_39_be.login.controller;
 
 
 
+import com.example._2024_danpoong_team_39_be.domain.CareRecipient;
+import com.example._2024_danpoong_team_39_be.login.converter.CareRecipientConverter;
+import com.example._2024_danpoong_team_39_be.login.dto.CareRecipientDTO;
 import com.example._2024_danpoong_team_39_be.login.dto.FillupResultDTO;
 import com.example._2024_danpoong_team_39_be.login.service.AuthService;
 import com.example._2024_danpoong_team_39_be.login.BaseResponse;
@@ -9,30 +12,26 @@ import com.example._2024_danpoong_team_39_be.login.converter.MemberConverter;
 import com.example._2024_danpoong_team_39_be.domain.Member;
 import com.example._2024_danpoong_team_39_be.login.dto.MemberRequestDTO;
 import com.example._2024_danpoong_team_39_be.login.dto.MemberResponseDTO;
+import com.example._2024_danpoong_team_39_be.login.service.CareRecipentService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import static org.hibernate.query.sqm.tree.SqmNode.log;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("")
 public class AuthController {
 
     private final AuthService authService;
-//    private final MemberService memberService;
+    private final CareRecipentService careRecipentService;
 
-//    // 회원가입용 폼 추가 입력 url
-//    @PostMapping("/api/member/signup/fillup")
-//    public BaseResponse<MemberRequestDTO.FillupRequestDTO> fillUpMember(
-//            @RequestBody MemberRequestDTO.FillupRequestDTO fillupRequestDTO) {
-//        Member updatedMember = memberService.updateMember(fillupRequestDTO);
-//        MemberRequestDTO.FillupRequestDTO responseDTO = MemberConverter.toMember(updatedMember);
-//        return BaseResponse.onSuccess(updatedMember); // 추후 jwt 로직 추가 예정(토큰으로 프론트에 보내줌)
-//    }
 
-    // 멤버 추갖 ㅓㅇ보 입력
+    // 멤버 추가 정보 입력
     @PutMapping("api/member/signup/fillup")
     public ResponseEntity<FillupResultDTO> updateAdditionalInfo(
             @RequestHeader("Authorization") String token,
@@ -48,5 +47,26 @@ public class AuthController {
     public BaseResponse<MemberResponseDTO.JoinResultDTO> kakaoLogin(@RequestParam("code") String accessCode, HttpServletResponse httpServletResponse) {
         Member member = authService.oAuthLogin(accessCode, httpServletResponse);
         return BaseResponse.onSuccess(MemberConverter.toJoinResultDTO(member));
+    }
+
+    @RequiredArgsConstructor
+    @RestController
+    public class CareRecipientController {
+
+        private final CareRecipentService careRecipentService;
+
+        @PostMapping("/api/care_recipient")
+        public BaseResponse<CareRecipientDTO.CareRecipientProfile> CareRecipientFillup(
+                @RequestHeader("Authorization") String token,
+                @RequestBody CareRecipientDTO.CareRecipientProfile careRecipientProfile,
+                @RequestParam(defaultValue = "unknown") String relationship) {
+
+            // CareRecipient 생성
+            CareRecipient careRecipient = careRecipentService.createCareRecipient(token, careRecipientProfile, relationship);
+
+            log.info("CareRecipient 값:"+careRecipient);
+            // DTO로 변환 후 반환
+            return BaseResponse.onSuccess(CareRecipientConverter.toCareRecipient(careRecipient));
+        }
     }
 }

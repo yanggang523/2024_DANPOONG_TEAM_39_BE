@@ -25,7 +25,8 @@ public class FillupResultDTO {
 
     // 모든 필드 포함 생성자 (빌더 패턴용)
     @Builder
-    public FillupResultDTO(Long id, String name, String alias, int age, Gender gender, int phoneNum, String email, upLoadProfile profileImage) {
+    public FillupResultDTO(
+            Long id, String name, String alias, int age, Gender gender, String email, upLoadProfile profileImage) {
         this.id = id;
         this.name = name;
         this.alias = alias;
