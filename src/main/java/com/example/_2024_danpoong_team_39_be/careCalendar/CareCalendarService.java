@@ -113,7 +113,7 @@ public class CareCalendarService
 
         // 해당 careRecipient에 속한 careAssignments와 그에 연결된 멤버들만 수정 가능
         // careRecipient의 careAssignment에 연결된 멤버가 userId와 일치하는지 확인
-        if (careRecipient.getCareAssignments().stream()
+        if (careRecipient.getCareAssignment().stream()
                 .anyMatch(assignment -> assignment.getMember().getId().equals(userId))) {
             return true; // userId가 해당 careRecipient의 careAssignments에 포함된 멤버인 경우
         }
