@@ -7,7 +7,6 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 @Component
@@ -22,10 +21,12 @@ public class JwtUtil {
     // 리프레시 토큰 만료 시간 (7일)
     private final long refreshExpirationTime = 1000 * 60 * 60 * 24 * 7;
 
-    // 액세스 토큰 생성
-    public String createAccessToken(String username) {
+
+    // JWT 토큰 생성
+    public String createAccessToken(String email) {
+
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(email)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + accessExpirationTime))
                 .signWith(secretKey)
