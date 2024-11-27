@@ -4,8 +4,6 @@ package com.example._2024_danpoong_team_39_be.login.converter;
 import com.example._2024_danpoong_team_39_be.domain.CareRecipient;
 import com.example._2024_danpoong_team_39_be.login.dto.CareRecipientDTO;
 
-import java.time.LocalTime;
-
 public class CareRecipientConverter {
     public static CareRecipientDTO.CareRecipientProfile toCareRecipient(CareRecipient careRecipient) {
         if (careRecipient == null) {
@@ -13,7 +11,7 @@ public class CareRecipientConverter {
         }
 
         return CareRecipientDTO.CareRecipientProfile.builder()
-                .id(careRecipient.getCareRecipientId())
+                .id(careRecipient.getId())
                 .name(careRecipient.getName())
                 .diagnosis(careRecipient.getDiagnosis())
                 .mobilty_status(careRecipient.getMobilityStatus())
@@ -24,20 +22,20 @@ public class CareRecipientConverter {
                 .build();
     }
 
-    public static CareRecipient toCareRecipient(Long id, String name, String diagnosis, String mobilityStatus,
-                                                LocalTime startSleepTime, LocalTime endSleepTime, String address,
-                                                LocalTime avgSleepTime) {
+    // CareRecipientDTO.CareRecipientProfile -> CareRecipient 변환
+    public static CareRecipient toCareRecipient(CareRecipientDTO.CareRecipientProfile careRecipientProfile) {
         return CareRecipient.builder()
-                .careRecipientId(id)
-                .name(name)
-                .diagnosis(diagnosis)
-                .mobilityStatus(mobilityStatus)
-                .startSleepTime(startSleepTime)
-                .endSleepTime(endSleepTime)
-                .address(address)
-                .avgSleepTime(avgSleepTime)
+                .id(careRecipientProfile.getId())
+                .name(careRecipientProfile.getName())
+                .diagnosis(careRecipientProfile.getDiagnosis())
+                .mobilityStatus(careRecipientProfile.getMobilty_status())
+                .startSleepTime(careRecipientProfile.getStart_sleep_time())
+                .endSleepTime(careRecipientProfile.getEnd_sleep_time())
+                .address(careRecipientProfile.getAddress())
+                .avgSleepTime(careRecipientProfile.getAvg_sleep_time())
                 .build();
     }
+
 
 
 }

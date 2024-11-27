@@ -31,8 +31,7 @@ public class Member {
     @Column(nullable = false, length = 50)
     private String email;
 
-    @OneToOne
-    @JoinColumn(name = "care_assignment_id") // CareAssignment에 속함
+    @OneToOne(mappedBy = "member")
     private CareAssignment careAssignment;
 
 //    이미지 받기 구현 생략

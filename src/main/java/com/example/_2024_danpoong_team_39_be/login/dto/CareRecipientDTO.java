@@ -9,11 +9,10 @@ import java.time.LocalTime;
 
 public class CareRecipientDTO {
 
-    //응답용
     @Getter
     @Setter
     @Builder
-    public static class CareRecipientProfile{
+    public static class CareRecipientProfile {
         private Long id;
         private String name;
         private String diagnosis;
@@ -24,12 +23,12 @@ public class CareRecipientDTO {
         private LocalTime avg_sleep_time;
     }
 
-    //요청용
+
 //    @Getter
 //    @Setter
 //    @Builder
 //    public static class CareRecipientProfile {
-//        private Long id;
+//        private Long careRecipientid;
 //        private String name;
 //        private String diagnosis;
 //        private String mobilty_status;

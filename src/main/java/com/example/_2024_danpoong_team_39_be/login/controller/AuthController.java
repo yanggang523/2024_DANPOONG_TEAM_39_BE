@@ -15,16 +15,21 @@ import com.example._2024_danpoong_team_39_be.login.dto.MemberResponseDTO;
 import com.example._2024_danpoong_team_39_be.login.service.CareRecipentService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import static org.hibernate.query.sqm.tree.SqmNode.log;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("")
 public class AuthController {
 
     private final AuthService authService;
+    private final CareRecipentService careRecipentService;
+
 
     // 멤버 추가 정보 입력
     @PutMapping("api/member/signup/fillup")
@@ -44,10 +49,24 @@ public class AuthController {
         return BaseResponse.onSuccess(MemberConverter.toJoinResultDTO(member));
     }
 
-    // 최초 돌봄가족 입력 (토큰 요청 후 로그인)
-    @PostMapping("/api/care_recipient/{member_id}")
-    public BaseResponse<CareRecipientDTO> CareRecipientFillup(){
-        CareRecipient careRecipient = CareRecipentService.createCareRecipient;
-        return BaseResponse.onSuccess(CareRecipientConverter.toCareRecipient(newCareRecipient));
+    @RequiredArgsConstructor
+    @RestController
+    public class CareRecipientController {
+
+        private final CareRecipentService careRecipentService;
+
+        @PostMapping("/api/care_recipient")
+        public BaseResponse<CareRecipientDTO.CareRecipientProfile> CareRecipientFillup(
+                @RequestHeader("Authorization") String token,
+                @RequestBody CareRecipientDTO.CareRecipientProfile careRecipientProfile,
+                @RequestParam(defaultValue = "unknown") String relationship) {
+
+            // CareRecipient 생성
+            CareRecipient careRecipient = careRecipentService.createCareRecipient(token, careRecipientProfile, relationship);
+
+            log.info("CareRecipient 값:"+careRecipient);
+            // DTO로 변환 후 반환
+            return BaseResponse.onSuccess(CareRecipientConverter.toCareRecipient(careRecipient));
+        }
     }
 }

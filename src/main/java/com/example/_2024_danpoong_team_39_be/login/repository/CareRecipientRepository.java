@@ -8,7 +8,7 @@ import java.util.List;
 
 @Repository
 public interface CareRecipientRepository extends JpaRepository<CareRecipient, Long> {
-    List<CareRecipient> findByCareRecipientId(Long id);
+    List<CareRecipient> id(Long id);
 }
 
 /*
