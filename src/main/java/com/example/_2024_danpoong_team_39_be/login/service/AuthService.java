@@ -55,7 +55,7 @@ public class AuthService {
                 kakaoProfile.getKakao_account().getProfile().getNickname()
 
         );
-
+        log.info("새로운 멤버 db에 저장" + newMember.toString());
         return memberRepository.save(newMember);
     }
 

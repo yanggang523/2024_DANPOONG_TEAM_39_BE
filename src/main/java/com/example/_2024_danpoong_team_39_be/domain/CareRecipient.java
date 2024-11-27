@@ -10,44 +10,40 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class CareRecipient {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "care_recipient_id")
-    private Long careRecipientId;
+    private Long id;
 
-    @Column(name = "name", length = 50, nullable = false)
+    @Column(length = 50, nullable = false)
     private String name;
 
-    @Column(name = "diagnosis", length = 50)
+    @Column(length = 50)
     private String diagnosis;
 
-    @Column(name = "mobility_status", length = 50)
+    @Column(length = 50)
     private String mobilityStatus;
 
-    @Column(name = "start_sleep_time")
     private LocalTime startSleepTime;
 
-    @Column(name = "end_sleep_time")
     private LocalTime endSleepTime;
 
-    @Column(name = "address", length = 100)
     private String address;
 
-    @Column(name = "avg_sleep_time")
     private LocalTime avgSleepTime;
 
     // 연관관계
-    @OneToMany(mappedBy = "recipient", fetch = FetchType.LAZY)
-    private List<CareAssignment> careAssignments;
+    @OneToMany(mappedBy = "recipient")
+    private List<CareAssignment> careAssignment = new ArrayList<>();
 
     // 프로필 이미지 없습니다! (추후 추가 예정)
 
     public CareRecipient(
-            Long careRecipientId, String name, String diagnosis, String mobilityStatus, LocalTime startSleepTime, LocalTime endSleepTime, String address, LocalTime avgSleepTime) {
-        this.careRecipientId = careRecipientId;
+            Long id, String name, String diagnosis, String mobilityStatus, LocalTime startSleepTime, LocalTime endSleepTime, String address, LocalTime avgSleepTime) {
         this.name = name;
         this.diagnosis = diagnosis;
         this.mobilityStatus = mobilityStatus;

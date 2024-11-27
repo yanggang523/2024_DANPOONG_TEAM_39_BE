@@ -9,7 +9,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,15 +40,20 @@ public class JwtUtil {
         return new UsernamePasswordAuthenticationToken(username, null, new ArrayList<>());
     }
 
+
     // 토큰에서 만료 시간 가져오기
     public Date getExpirationDateFromToken(String token) {
         Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
         return claims.getExpiration();
     }
-    // 액세스 토큰 생성
-    public String createAccessToken(String username) {
+
+
+    // JWT 토큰 생성
+    public String createAccessToken(String email) {
+
+
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(email)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + accessExpirationTime))
                 .signWith(secretKey)
