@@ -134,7 +134,7 @@ public class CareCalendarService
 
             // 해당 Calendar가 CareAssignment와 연결된 CareRecipient와 일치하는지 확인
             CareAssignment careAssignment = calendar.getCareAssignment();
-            if (careAssignment == null || !careAssignment.getRecipient().getCareRecipientId().equals(userId)) {
+            if (careAssignment == null || !careAssignment.getRecipient().getId().equals(userId)) {
                 throw new IllegalArgumentException("이 일정은 해당 CareRecipient와 연결되지 않았거나 권한이 없습니다.");
             }
 
