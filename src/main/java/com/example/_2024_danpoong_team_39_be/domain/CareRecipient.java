@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -39,8 +40,8 @@ public class CareRecipient {
     private LocalTime avgSleepTime;
 
     // 연관관계
-    @OneToOne(mappedBy = "recipient", cascade = CascadeType.ALL, orphanRemoval = true)
-    private CareAssignment careAssignment;
+    @OneToMany(mappedBy = "recipient", fetch = FetchType.LAZY)
+    private List<CareAssignment> careAssignments;
 
     // 프로필 이미지 없습니다! (추후 추가 예정)
 
