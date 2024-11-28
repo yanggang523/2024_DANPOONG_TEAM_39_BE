@@ -28,7 +28,6 @@ import static org.hibernate.query.sqm.tree.SqmNode.log;
 public class AuthController {
 
     private final AuthService authService;
-    private final CareRecipentService careRecipentService;
 
 
     // 멤버 추가 정보 입력
