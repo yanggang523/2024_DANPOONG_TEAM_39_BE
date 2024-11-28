@@ -5,11 +5,15 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
 @Component
+@Slf4j
+@Configuration
 public class JwtUtil {
 
     // 키 생성
@@ -52,4 +56,5 @@ public class JwtUtil {
                 .getBody();
         return claims.getSubject(); // JWT의 subject 필드에서 이메일 반환
     }
+
 }
