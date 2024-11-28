@@ -41,6 +41,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             String token = authorizationHeader.substring(7).trim(); // Bearer 이후 토큰만 추출
             log.info("token:{}", token);
 
+            jwtUtil.debugJwtToken(token);
+
             try {
                 // JWT에서 이메일 추출
                 String email = jwtUtil.getEmailFromToken(token);
