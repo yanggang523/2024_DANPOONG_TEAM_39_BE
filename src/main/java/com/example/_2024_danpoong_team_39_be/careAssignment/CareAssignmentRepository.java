@@ -16,14 +16,14 @@ import java.util.Optional;
 public interface CareAssignmentRepository extends JpaRepository<CareAssignment, Long> {
 
     Optional<CareAssignment> findById(Long id);
-    Optional<CareAssignment> findByEmail(String email);  // 이메일로 CareAssignment 조회
 
-    @Query("SELECT ca FROM CareAssignment ca " +
-            "JOIN ca.calendars c " +
-            "WHERE c.date = :date " +
-            "AND c.startTime BETWEEN :startTime AND :endTime " +
-            "OR c.endTime BETWEEN :startTime AND :endTime")
-    List<CareAssignment> findCareAssignmentsByDateAndTimeRange(@Param("date") LocalDate date,
-                                                               @Param("startTime") LocalTime startTime,
-                                                               @Param("endTime") LocalTime endTime);
+//    Optional<CareAssignment> findByEmail(String email);  // 이메일로 CareAssignment 조회
+//    @Query("SELECT ca FROM CareAssignment ca " +
+//            "JOIN ca.calendars c " +
+//            "WHERE c.date = :date " +
+//            "AND c.startTime BETWEEN :startTime AND :endTime " +
+//            "OR c.endTime BETWEEN :startTime AND :endTime")
+//    List<CareAssignment> findCareAssignmentsByDateAndTimeRange(@Param("date") LocalDate date,
+//                                                               @Param("startTime") LocalTime startTime,
+//                                                               @Param("endTime") LocalTime endTime);
 }

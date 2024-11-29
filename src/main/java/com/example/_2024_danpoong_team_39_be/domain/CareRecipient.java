@@ -16,6 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 public class CareRecipient {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -32,14 +32,14 @@ public interface CalendarRepository extends JpaRepository<Calendar, Long> {
     List<Calendar> findByDateAndId(LocalDate date, Long id);
 
     List<Calendar> findByDateAndStartTimeLessThanAndEndTimeGreaterThan(LocalDate date, LocalTime adjustedEndTime, LocalTime adjustedStartTime);
-    @Query("SELECT ca FROM CareAssignment ca " +
-            "JOIN ca.calendars c " +
-            "WHERE c.date = :date " +
-            "AND (c.startTime BETWEEN :startTime AND :endTime " +
-            "OR c.endTime BETWEEN :startTime AND :endTime)")
-    List<CareAssignment> findCareAssignmentsByDateAndTimeRange(@Param("date") LocalDate date,
-                                                               @Param("startTime") LocalTime startTime,
-                                                               @Param("endTime") LocalTime endTime);
+//    @Query("SELECT ca FROM CareAssignment ca " +
+//            "JOIN ca.calendars c " +
+//            "WHERE c.date = :date " +
+//            "AND (c.startTime BETWEEN :startTime AND :endTime " +
+//            "OR c.endTime BETWEEN :startTime AND :endTime)")
+//    List<CareAssignment> findCareAssignmentsByDateAndTimeRange(@Param("date") LocalDate date,
+//                                                               @Param("startTime") LocalTime startTime,
+//                                                               @Param("endTime") LocalTime endTime);
 
 
 }
