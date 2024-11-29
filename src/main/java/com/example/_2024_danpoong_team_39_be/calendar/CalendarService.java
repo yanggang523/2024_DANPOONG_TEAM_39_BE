@@ -30,23 +30,28 @@ public class CalendarService {
         return calendarRepository.findCalendarByCareAssignmentIdAndDate(id, date);
     }
 
-    // 일정 추가
-    public Calendar addEvent(Calendar calendar) {
+    // 돌봄일정일경우 돌보미 지정o, 내일정일경우 본인 캘린더에 저장
+    public Calendar addEvent(Calendar calendar, String loggedInUserEmail) {
         // CareAssignment가 존재하는지 확인
-
+        if (calendar.getCareAssignment() == null) {
+            throw new IllegalArgumentException("CareAssignment가 필요합니다.");
+        }
 
         // 시간 충돌 검사
         if (isTimeConflict(calendar)) {
             throw new IllegalArgumentException("해당 시간대에 이미 일정이 존재합니다.");
         }
-        // 종일선택시 starttime  수면시작시간 , endTime - 수면종료시간
 
+        // 이메일 설정 (CareAssignment에서 이메일 가져오기)
+        calendar.setEmail(calendar.getCareAssignment().getEmail());  // CareAssignment에서 이메일을 가져옴
+
+        // 종일 일정일 경우, 시작시간과 종료시간을 수면시간으로 설정
         if (Boolean.TRUE.equals(calendar.getIsAllday())) {
             calendar.setStartTime(calendar.getCareAssignment().getRecipient().getStartSleepTime());
             calendar.setEndTime(calendar.getCareAssignment().getRecipient().getEndSleepTime());
         }
 
-        // 주기 설정에 따라 일정 시작 날짜를 자동으로 생성
+        // 반복 일정이 있을 경우
         if (calendar.getRepeatCycle() != null) {
             LocalDate startDate = calendar.getDate(); // startDate 가져오기
 
@@ -65,21 +70,16 @@ public class CalendarService {
                 repeatEvent.setEventType(calendar.getEventType());
                 repeatEvent.setStartTime(calendar.getStartTime());
                 repeatEvent.setEndTime(calendar.getEndTime());
-                repeatEvent.setName(calendar.getCareAssignment().getMember().getAlias());
-                repeatEvent.setTitle(calendar.getTitle());
+                repeatEvent.setEmail(calendar.getEmail());
                 repeatEvent.setIsAllday(calendar.getIsAllday());
                 repeatEvent.setMemo(calendar.getMemo());
                 repeatEvent.setLocation(calendar.getLocation());
                 repeatEvent.setRepeatCycle(calendar.getRepeatCycle());
                 repeatEvent.setIsShared(calendar.getIsShared());
                 repeatEvent.setCategory(calendar.getCategory());
-                repeatEvent.setIsAllday(calendar.getIsAllday());
-                repeatEvent.setMeal(calendar.getMeal());
-                repeatEvent.setHospital(calendar.getHospital());
-                repeatEvent.setRest(calendar.getRest());
-                repeatEvent.setMedication(calendar.getMedication());
 
-
+                // 이메일 설정
+                repeatEvent.setEmail(calendar.getEmail());  // 반복 일정에도 이메일 설정
 
                 // 시간 충돌 검사
                 if (isTimeConflict(repeatEvent)) {
@@ -98,6 +98,18 @@ public class CalendarService {
                 calendar.setDate(LocalDate.now());
             }
 
+            // 일정 저장
+            if (Boolean.TRUE.equals(calendar.getIsShared())) {
+                // 공유 일정일 경우, 선택한 CareAssignment의 캘린더에 저장
+                CareAssignment selectedCareAssignment = careAssignmentRepository.findByEmail(loggedInUserEmail)
+                        .orElseThrow(() -> new IllegalArgumentException("선택한 CareAssignment가 존재하지 않습니다."));
+
+                // 선택한 CareAssignment의 캘린더에 일정 저장
+                calendar.setCareAssignment(selectedCareAssignment);  // 다른 사람의 캘린더에 일정 설정
+
+                // 이메일 설정 (다른 사람의 이메일을 캘린더에 반영)
+                calendar.setEmail(selectedCareAssignment.getEmail());
+            }
 
             // 일정 저장
             calendarRepository.save(calendar);
@@ -113,6 +125,9 @@ public class CalendarService {
 
         return calendar;  // 추가된 일정 객체를 반환
     }
+
+
+
 
     // 시간 충돌 검사 메서드
     private boolean isTimeConflict(Calendar calendar) {
@@ -192,16 +207,23 @@ public class CalendarService {
     }
 
     // 일정 수정
-    public Calendar updateEvent(Long id, Calendar updatedCalendar) {
+    public Calendar updateEvent(Long id, Calendar updatedCalendar, String email) {
         Optional<Calendar> existingCalendar = calendarRepository.findById(id);
         if (existingCalendar.isPresent()) {
             Calendar calendar = existingCalendar.get();
 
+            // 이메일이 일치하는지 확인
+            if (!calendar.getEmail().equals(email)) {
+                throw new IllegalArgumentException("이메일이 일치하지 않습니다.");
+            }
+
             if (calendar.getId().equals(id)) {
+                // 시간 충돌 검사
                 if (isTimeConflict(updatedCalendar)) {
                     throw new IllegalArgumentException("해당 시간대에 이미 일정이 존재합니다.");
                 }
 
+                // 업데이트된 값이 있으면 해당 값을 설정
                 if (updatedCalendar.getTitle() != null) {
                     calendar.setTitle(updatedCalendar.getTitle());
                 }
@@ -220,7 +242,7 @@ public class CalendarService {
                 if (updatedCalendar.getMemo() != null) {
                     calendar.setMemo(updatedCalendar.getMemo());
                 }
-                if(updatedCalendar.getIsAllday() != null){
+                if (updatedCalendar.getIsAllday() != null) {
                     calendar.setIsAllday(updatedCalendar.getIsAllday());
                 }
                 if (updatedCalendar.getRepeatCycle() != null) {
@@ -277,12 +299,21 @@ public class CalendarService {
     }
 
     // 일정 삭제
-    public void deleteEvent(Long id) {
+    public void deleteEvent(Long id, String email) {
         Optional<Calendar> calendar = calendarRepository.findById(id);
         if (calendar.isPresent()) {
-            calendarRepository.delete(calendar.get());
+            Calendar existingCalendar = calendar.get();
+
+            // 이메일이 일치하는지 확인
+            if (!existingCalendar.getEmail().equals(email)) {
+                throw new IllegalArgumentException("이메일이 일치하지 않습니다.");
+            }
+
+            // 이메일이 일치하면 일정 삭제
+            calendarRepository.delete(existingCalendar);
         } else {
             throw new IllegalArgumentException("일정을 찾을 수 없습니다.");
         }
     }
+
 }

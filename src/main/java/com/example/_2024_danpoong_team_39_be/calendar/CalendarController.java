@@ -1,11 +1,15 @@
 package com.example._2024_danpoong_team_39_be.calendar;
 
+import com.example._2024_danpoong_team_39_be.careCalendar.CareCalendarService;
 import com.example._2024_danpoong_team_39_be.domain.CareAssignment;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @RestController
@@ -13,7 +17,8 @@ import java.util.List;
 public class CalendarController {
     @Autowired
     private CalendarService careAssignmentService;
-
+  @Autowired
+  private CareCalendarService careCalendarService;
     @Autowired
     private CalendarRepository calendarRepository;
     // 특정 날짜의 세부 일정 조회(1개) 작동 o
@@ -33,28 +38,90 @@ public class CalendarController {
         List<Calendar> calendars = calendarRepository.findCalendarByCareAssignmentId(careAssignmentId);
         return ResponseEntity.ok(calendars);
     }
+    //일정추가폼
+    @GetMapping("")
+    public Object getEmptyCalendarForm(@RequestParam LocalDate date,
+                                       @RequestParam LocalTime startTime,
+                                       @RequestParam LocalTime endTime) {
+        // 빈 시간대에 돌보미만 반환하는 로직 추가
+        Object result = careCalendarService.getCareAssignmentsForBlankSlot(date, startTime, endTime);
 
+        // 결과가 "빈 시간대에 돌보미가 없습니다."라는 메시지라면 메시지 반환
+        if (result instanceof String) {
+            return result; // "빈 시간대에 돌보미가 없습니다." 메시지 반환
+        }
+
+        // 돌보미가 있을 경우 Calendar 객체 생성하여 반환
+        Calendar calendar = new Calendar();
+        calendar.setCaregiver((List<CareAssignment>) result);  // 돌보미 리스트 설정
+        return calendar;
+    }
     // 일정 추가
     @PostMapping("")
-    public ResponseEntity<Calendar> addEvent(@RequestBody Calendar calendar) {
+    public ResponseEntity<Calendar> addEvent(@RequestBody Calendar calendar, Principal principal) {
         try {
+            System.out.println("addEvent 메서드 호출됨");
+            System.out.println("로그인 사용자: " + principal.getName());  // principal 수정됨
+            System.out.println("전송된 이메일: " + calendar.getCareAssignment().getEmail());
+
+            // 이메일이 일치하는지 확인
+            String loggedInUserEmail = principal.getName(); // 로그인한 사용자의 이메일
+
+            if (!loggedInUserEmail.equals(calendar.getCareAssignment().getEmail())) {
+                // 이메일이 일치하지 않으면 권한 없음 처리
+                System.out.println(principal.getName());  // principal 수정됨
+                System.out.println(calendar.getCareAssignment().getEmail());
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+            // 기본 값 설정
             if (calendar.getIsShared() == null) {
-            calendar.setIsShared(false);
-        }
-        if (calendar.getCategory() == null || calendar.getCategory().isEmpty()) {
-            calendar.setCategory("myCalendar");
-        }
-            Calendar savedCalendar = careAssignmentService.addEvent(calendar);
+                calendar.setIsShared(false);
+            }
+            if (calendar.getCategory() == null || calendar.getCategory().isEmpty()) {
+                calendar.setCategory("myCalendar");
+            }
+            if (calendar.getCareAssignment() == null || calendar.getCareAssignment().getEmail() == null) {
+                System.out.println(principal.getName());  // principal 수정됨
+                System.out.println(calendar.getCareAssignment().getEmail());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // 잘못된 요청
+            }
+
+            System.out.println(principal.getName());  // principal 수정됨
+            System.out.println(calendar.getCareAssignment().getEmail());
+
+            // 서비스 메서드 호출
+            Calendar savedCalendar = careAssignmentService.addEvent(calendar, loggedInUserEmail);
             return ResponseEntity.ok(savedCalendar);
         } catch (IllegalArgumentException e) {
+            System.out.println(principal.getName());  // principal 수정됨
+            System.out.println(calendar.getCareAssignment().getEmail());
             return ResponseEntity.badRequest().body(null); // 잘못된 요청 처리
         }
     }
+
+
     // 일정 수정
     @PatchMapping("/events/{eventId}")
-    public ResponseEntity<Calendar> partialUpdateEvent(@PathVariable Long eventId, @RequestBody Calendar updatedCalendar) {
+    public ResponseEntity<Calendar> partialUpdateEvent(@PathVariable Long eventId, @RequestBody Calendar updatedCalendar, Principal principal) {
         try {
-            Calendar updatedEvent = careAssignmentService.updateEvent(eventId, updatedCalendar);
+            System.out.println("addEvent 메서드 호출됨");
+            System.out.println("로그인 사용자: " + principal.getName());  // principal 수정됨
+            System.out.println("전송된 이메일: " + updatedCalendar.getCareAssignment().getEmail());
+
+            // 이메일이 일치하는지 확인
+            String loggedInUserEmail = principal.getName(); // 로그인한 사용자의 이메일
+
+            if (!loggedInUserEmail.equals(updatedCalendar.getCareAssignment().getEmail())) {
+                // 이메일이 일치하지 않으면 권한 없음 처리
+                System.out.println(principal.getName());  // principal 수정됨
+                System.out.println(updatedCalendar.getCareAssignment().getEmail());
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+            System.out.println("addEvent 메서드 호출됨");
+            System.out.println("로그인 사용자: " + principal.getName());  // principal 수정됨
+            System.out.println("전송된 이메일: " + updatedCalendar.getCareAssignment().getEmail());
+            Calendar updatedEvent = careAssignmentService.updateEvent(eventId, updatedCalendar, loggedInUserEmail);
             if (updatedEvent != null) {
                 return ResponseEntity.ok(updatedEvent);
             } else {
@@ -67,12 +134,21 @@ public class CalendarController {
 
     // 일정 삭제
     @DeleteMapping("/events/{eventId}")
-    public ResponseEntity<Void> deleteEvent(@PathVariable Long eventId) {
+    public ResponseEntity<Void> deleteEvent(@PathVariable Long eventId, Principal principal) {
+        // principal에서 로그인한 사용자의 이메일을 가져옵니다.
+        String email = principal.getName();
+
         try {
-            careAssignmentService.deleteEvent(eventId);
-            return ResponseEntity.noContent().build(); // 삭제 성공 시 204 반환
+            // 이메일과 이벤트 ID를 기반으로 일정 삭제 요청을 서비스에 전달
+            careAssignmentService.deleteEvent(eventId, email);
+
+            // 삭제 성공 시 204 No Content 반환
+            return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build(); // 일정이 존재하지 않으면 404 반환
+            // 예외 발생 시, 일정이 없거나 이메일이 일치하지 않는 경우
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null); // 권한 오류 발생 시 403 반환
         }
     }
+
+
 }

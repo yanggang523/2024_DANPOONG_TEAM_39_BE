@@ -12,8 +12,12 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.sql.Array;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @Entity
@@ -39,6 +43,10 @@ public class Calendar {
     private String location; // 위치
     private String memo; // 메모
     private Boolean isShared; // 공유 여부
+    //돌보미조회
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<CareAssignment> caregiver = new ArrayList<>();  // careAssignment와의 관계 설정
+
     // Enum 클래스: 반복 주기 정의
     public enum RepeatCycle {
         DAILY, WEEKLY, MONTHLY
@@ -72,6 +80,6 @@ public class Calendar {
 
     //돌보미 등록
     private String name;
-
+    private String email;
 
 }

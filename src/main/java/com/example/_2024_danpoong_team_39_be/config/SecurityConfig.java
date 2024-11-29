@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
 
+
     private final JwtUtil jwtUtil;
     private final JWTAuthenticationFilter jwtAuthenticationFilter;
 
@@ -42,6 +43,7 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)  // 폼 로그인 비활성화
                 .httpBasic(AbstractHttpConfigurer::disable)  // HTTP Basic 인증 비활성화
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // JWT 필터 추가
+
 
 
         return http.build();
