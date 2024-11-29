@@ -37,7 +37,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            log.info("베리어 토큰으로 인식된 상황");
+            log.debug("베리어 토큰으로 인식된 상황");
             String token = authorizationHeader.substring(7).trim(); // Bearer 이후 토큰만 추출
             log.info("token:{}", token);
 
@@ -47,7 +47,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 // JWT에서 이메일 추출
                 String email = jwtUtil.getEmailFromToken(token);
 
-                log.info("시큐리티 jwt email 조회 : " + email);
+                log.debug("시큐리티 jwt email 조회 : " + email);
 
                 // 이메일로 Member 조회
                 Member member = memberRepository.findByEmail(email)
@@ -66,8 +66,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         }
         // 필터 체인 실행 및 예외 처리 추가
         try {
-            log.info("request:{}", request);
-            log.info("response:{}", response);
+            log.info("filterChain.doFilter request:{}", request);
+            log.info("filterChain.doFilter response:{}", response);
             filterChain.doFilter(request, response);
 
         } catch (Exception e) {

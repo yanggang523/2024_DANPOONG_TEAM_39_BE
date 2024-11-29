@@ -65,14 +65,14 @@ public class JwtUtil {
      * @return 이메일
      */
     public String getEmailFromToken(String token) {
-        log.info("jwtUtil에서 이런 토큰이 오고 있습니다(getEmailFromToken): {}", token);
+        log.debug("jwtUtil에서 이런 토큰이 오고 있습니다(getEmailFromToken): {}", token);
 
         try {
             // 1. Bearer 제거 로직 추가
             if (token != null && token.startsWith("Bearer ")) {
-                log.info("Bearer 토큰으로 인식되었습니다.");
+                log.debug("Bearer 토큰으로 인식되었습니다.");
                 token = token.substring(7).trim(); // Bearer 제거
-                log.info("제거되는 Token: {}", token);
+                log.debug("bearer 제거된 Token: {}", token);
             }
 
             // 2. 토큰 파트 나누기
@@ -83,7 +83,7 @@ public class JwtUtil {
 
             // 3. 페이로드(Base64URL 디코딩)
             String payload = new String(Base64.getUrlDecoder().decode(tokenParts[1]), StandardCharsets.UTF_8);
-            log.info("Decoded Payload: {}", payload);
+            log.debug("Decoded Payload: {}", payload);
 
             // 4. Jwts 라이브러리로 서명 검증
             Claims claims = Jwts.parserBuilder()
@@ -110,7 +110,7 @@ public class JwtUtil {
      * @param token 디코딩할 JWT 토큰
      */
     public static void debugJwtToken(String token) {
-        log.info("jwtUtil에서 이런 토큰이 오고 있습니다(debugJwtToken): {}", token);
+        log.debug("jwtUtil에서 이런 토큰이 오고 있습니다(debugJwtToken): {}", token);
 
         try {
             // 토큰 파트 나누기
@@ -121,14 +121,14 @@ public class JwtUtil {
             }
 
             // Raw 토큰 파트 로깅
-            log.info("Raw Header: {}", tokenParts[0]);
-            log.info("Raw Payload: {}", tokenParts[1]);
-            log.info("Raw Signature: {}", tokenParts[2]);
+            log.debug("Raw Header: {}", tokenParts[0]);
+            log.debug("Raw Payload: {}", tokenParts[1]);
+            log.debug("Raw Signature: {}", tokenParts[2]);
 
             // 헤더 디코딩
             try {
                 String header = new String(Base64.getUrlDecoder().decode(tokenParts[0]), StandardCharsets.UTF_8);
-                log.info("Decoded Header: {}", header);
+                log.debug("Decoded Header: {}", header);
             } catch (Exception e) {
                 log.error("JWT 헤더 디코딩 실패: {}", e.getMessage());
             }
@@ -136,7 +136,7 @@ public class JwtUtil {
             // 페이로드 디코딩
             try {
                 String payload = new String(Base64.getUrlDecoder().decode(tokenParts[1]), StandardCharsets.UTF_8);
-                log.info("Decoded Payload: {}", payload);
+                log.debug("Decoded Payload: {}", payload);
             } catch (Exception e) {
                 log.error("JWT 페이로드 디코딩 실패: {}", e.getMessage());
             }
