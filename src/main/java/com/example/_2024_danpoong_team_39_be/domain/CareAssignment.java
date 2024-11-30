@@ -20,7 +20,7 @@ public class CareAssignment {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_id", unique = true, nullable = false)
     private Member member;
 
     @Column(nullable = false, length = 50)
