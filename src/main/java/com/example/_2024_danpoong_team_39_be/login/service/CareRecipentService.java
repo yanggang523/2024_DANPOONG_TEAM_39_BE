@@ -58,24 +58,45 @@ public class CareRecipentService {
 
     @Transactional
     public CareRecipient createCareRecipient(String token, CareRecipientDTO.CareRecipientProfile careRecipientProfile, String relationship) {
-        // 토큰에서 이메일 추출
+        // 1. 토큰에서 이메일 추출
         String email = jwtUtil.getEmailFromToken(token);
 
-        // Member 검색
+        // 2. Member 검색
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("해당 이메일을 사용하는 유저를 찾을 수 없습니다: " + email));
 
-        // CareRecipient 생성
-        CareRecipient careRecipient = CareRecipientConverter.toCareRecipient(careRecipientProfile);
+        // 3. CareRecipient 확인 (ID가 존재하는 경우 DB에서 검색)
+        CareRecipient careRecipient;
+        if (careRecipientProfile.getId() != null) {
+            careRecipient = careRecipientRepository.findById(careRecipientProfile.getId())
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "해당 id를 사용하는 CareRecipient를 찾을 수 없습니다: " + careRecipientProfile.getId()));
+        } else {
+            // 4. 새로운 CareRecipient 생성
+            careRecipient = CareRecipientConverter.toCareRecipient(careRecipientProfile);
+            careRecipientRepository.save(careRecipient);
+        }
 
-        // CareAssignment 생성
+        // 5. CareAssignment 중복 확인
+        boolean isAssignmentExists = careAssignmentRepository.existsByMemberAndRecipientAndRelationship(
+                member, careRecipient, relationship
+        );
+
+        if (isAssignmentExists) {
+            throw new IllegalStateException("이미 존재하는 CareAssignment입니다: Member = " + member.getId() +
+                    ", CareRecipient = " + careRecipient.getId() + ", Relationship = " + relationship);
+        }
+
+        // 6. CareAssignment 생성
         CareAssignment careAssignment = CareAssignment.create(member, careRecipient, relationship);
         careAssignment.setMember(member);
         careAssignment.setRecipient(careRecipient);
         careAssignment.setRelationship(relationship);
 
-        // CareRecipient와 CareAssignment 저장
-        careRecipient.setCareAssignment(Collections.singletonList(careAssignment)); // CareRecipient에 CareAssignment 설정
+        // 7. CareRecipient에 CareAssignment 추가 (양방향 관계 설정)
+        careRecipient.addCareAssignment(careAssignment);
+
+        // 8. 저장
         careRecipientRepository.save(careRecipient); // CareRecipient 저장
         careAssignmentRepository.save(careAssignment); // CareAssignment 저장
 

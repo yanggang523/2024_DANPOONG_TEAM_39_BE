@@ -1,6 +1,7 @@
 package com.example._2024_danpoong_team_39_be.login.repository;
 
 import com.example._2024_danpoong_team_39_be.domain.CareRecipient;
+import com.example._2024_danpoong_team_39_be.domain.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -9,6 +10,7 @@ import java.util.List;
 @Repository
 public interface CareRecipientRepository extends JpaRepository<CareRecipient, Long> {
     List<CareRecipient> id(Long id);
+
 }
 
 /*

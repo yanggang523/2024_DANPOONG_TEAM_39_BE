@@ -11,7 +11,10 @@ public class SecurityConstants {
             "/api/v1/replies/**",
             "/login",
             "/auth/login/kakao/**",
-            "/api/member/signup"
+            "/api/member/signup/**",
+            "/api/member/signup",
+            "/favicon.ico",
+            "/error"
     };
 
 }

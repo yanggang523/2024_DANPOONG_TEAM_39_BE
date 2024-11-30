@@ -2,6 +2,8 @@ package com.example._2024_danpoong_team_39_be.careAssignment;
 
 import com.example._2024_danpoong_team_39_be.calendar.Calendar;
 import com.example._2024_danpoong_team_39_be.domain.CareAssignment;
+import com.example._2024_danpoong_team_39_be.domain.CareRecipient;
+import com.example._2024_danpoong_team_39_be.domain.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,5 +15,9 @@ import java.util.Optional;
 public interface CareAssignmentRepository extends JpaRepository<CareAssignment, Long> {
 
     Optional<CareAssignment> findById(Long id);
+
+    boolean existsByMemberAndRecipientAndRelationship(Member member, CareRecipient recipient, String relationship);
+
+
 
 }
