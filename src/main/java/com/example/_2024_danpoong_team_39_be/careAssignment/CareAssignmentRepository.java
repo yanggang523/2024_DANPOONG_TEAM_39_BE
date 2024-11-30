@@ -17,6 +17,8 @@ public interface CareAssignmentRepository extends JpaRepository<CareAssignment, 
 
     Optional<CareAssignment> findById(Long id);
 
+    Optional<CareAssignment> findByEmail(String email);
+
 //    Optional<CareAssignment> findByEmail(String email);  // 이메일로 CareAssignment 조회
 //    @Query("SELECT ca FROM CareAssignment ca " +
 //            "JOIN ca.calendars c " +

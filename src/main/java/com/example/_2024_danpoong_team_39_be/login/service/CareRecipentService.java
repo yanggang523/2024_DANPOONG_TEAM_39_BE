@@ -70,16 +70,14 @@ public class CareRecipentService {
 
         // CareAssignment 생성
         CareAssignment careAssignment = CareAssignment.create(member, careRecipient, relationship);
-        careAssignment.setMember(member);
-        careAssignment.setRecipient(careRecipient);
-        careAssignment.setRelationship(relationship);
 
         // CareRecipient와 CareAssignment 저장
-        careRecipient.setCareAssignment(Collections.singletonList(careAssignment)); // CareRecipient에 CareAssignment 설정
-        careRecipientRepository.save(careRecipient); // CareRecipient 저장
-        careAssignmentRepository.save(careAssignment); // CareAssignment 저장
+        careRecipient.setCareAssignment(Collections.singletonList(careAssignment));
+        careRecipientRepository.save(careRecipient);
+        careAssignmentRepository.save(careAssignment);
 
         log.info("CareRecipient 및 CareAssignment 저장 완료: {}, {}", careRecipient, careAssignment);
         return careRecipient;
     }
+
 }

@@ -1,11 +1,13 @@
 package com.example._2024_danpoong_team_39_be.serviceRecommendation;
 
+import com.example._2024_danpoong_team_39_be.domain.CareRecipient;
+import com.example._2024_danpoong_team_39_be.login.repository.CareRecipientRepository;
+import com.example._2024_danpoong_team_39_be.login.service.CareRecipentService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Random;
 
@@ -14,9 +16,26 @@ import java.util.Random;
 public class KakaoGeoController {
     @Autowired
     private KakaoGeoService kakaoGeoService;
+
+    // careRecipientService나 repository를 통해 careRecipient를 가져옵니다.
+    @Autowired
+    private CareRecipentService careRecipentService;
+    @Autowired
+    private CareRecipientRepository careRecipientRepository;
+
     private final Random random = new Random();
-    @GetMapping("/recommendation")
-    public ResponseEntity<String> searchHospital(@RequestParam String address) {
+    @Value("${kakao.api.key}")
+    private String apiKey;
+    // careRecipient 객체에서 주소를 가져와서 추천 장소를 찾는 API
+    @GetMapping("/recommendation/{careRecipientId}")
+    public ResponseEntity<String> searchHospital(@PathVariable Long careRecipientId, HttpServletResponse response) {
+        // careRecipientId로 careRecipient 조회
+        CareRecipient careRecipient = careRecipientRepository.findById(careRecipientId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 careRecipient을 찾을 수 없습니다."));
+
+        // careRecipient 객체에서 주소 추출
+        String address = careRecipient.getAddress();
+        System.out.println(address);
         // 주소로부터 위도/경도 변환
         String coordinates = kakaoGeoService.getCoordinatesFromAddress(address);
 
@@ -35,12 +54,9 @@ public class KakaoGeoController {
         // 배열 중 하나를 랜덤으로 픽
         String query = queries[random.nextInt(queries.length)];
 
-        // 로그
-        System.out.println("Received Request with query: " + query + ", x: " + x + ", y: " + y + ", radius: " + radius);
-
         // 장소 검색
         String result = kakaoGeoService.searchPlaces(query, x, y, radius);
-
+        response.setHeader("Authorization", "KakaoAK " + apiKey);
         return ResponseEntity.ok(result);
     }
 }

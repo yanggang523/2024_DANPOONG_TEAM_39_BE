@@ -17,8 +17,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
-
-
     private final JwtUtil jwtUtil;
     private final JWTAuthenticationFilter jwtAuthenticationFilter;
 
@@ -39,7 +37,9 @@ public class SecurityConfig {
                         authorizeRequests
                                 .requestMatchers(SecurityConstants.ALLOW_URLS).permitAll()  // 공개 URL 설정
                                 .requestMatchers("/api/careCalendar/**").permitAll()
-                                .anyRequest().authenticated()  // 나머지 요청은 인증 필요
+                                .requestMatchers("/api/calendar/**").permitAll()
+                                .requestMatchers("/api/recommendation/**").permitAll()
+                                .anyRequest().permitAll()  // 나머지 요청은 인증 필요
                 )
                 .formLogin(AbstractHttpConfigurer::disable)  // 폼 로그인 비활성화
                 .httpBasic(AbstractHttpConfigurer::disable)  // HTTP Basic 인증 비활성화

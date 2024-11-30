@@ -60,6 +60,7 @@ public class CareCalendarService
             for (LocalDate repeatDate : repeatDates) {
                 Calendar repeatEvent = new Calendar();
                 repeatEvent.setDate(repeatDate);
+                repeatEvent.setIsAlarm(calendar.getIsAlarm());
                 repeatEvent.setTitle(calendar.getTitle());
                 repeatEvent.setEventType(calendar.getEventType());
                 repeatEvent.setStartTime(calendar.getStartTime());

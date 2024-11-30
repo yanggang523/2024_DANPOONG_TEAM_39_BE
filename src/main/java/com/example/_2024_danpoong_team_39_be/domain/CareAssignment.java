@@ -23,6 +23,9 @@ public class CareAssignment {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @Column(nullable = false, length = 50)
+    private String email;
+
     @JsonIgnore  // 이 필드는 직렬화 시 무시됩니다.
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
     @JoinColumn(name = "careRecipient_id", nullable = false)
@@ -39,7 +42,8 @@ public class CareAssignment {
         careAssignment.setMember(member);
         careAssignment.setRecipient(recipient);
         careAssignment.setRelationship(relationship);
-
+        careAssignment.setEmail(member.getEmail());
+//        이메일도 같이저장
         // Set both sides of the bi-directional relationship
         member.setCareAssignment(careAssignment);
         return careAssignment;
@@ -47,6 +51,5 @@ public class CareAssignment {
 
     public CareAssignment() {
     }
-
 
 }

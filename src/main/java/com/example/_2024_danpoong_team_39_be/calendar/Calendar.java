@@ -70,23 +70,20 @@ public class Calendar {
     @OneToOne(mappedBy = "calendar", cascade = CascadeType.ALL)
     private Rest rest;
 
-    @OneToOne(mappedBy = "calendar", cascade = CascadeType.ALL)
-    private Medication medication;
+    @OneToMany(mappedBy = "calendar", cascade = CascadeType.ALL)
+   private List<Medication> medications = new ArrayList<>();
 
-    @OneToOne(mappedBy = "calendar", cascade = CascadeType.ALL)
-    private Others others;
+    @OneToMany(mappedBy = "calendar", cascade = CascadeType.ALL)
+    private List<Others> others = new ArrayList<>();
 
     @OneToOne(mappedBy = "calendar", cascade = CascadeType.ALL)
     private MyCalendar myCalendar;
 
     private String category;
 
-    // 돌보미 등록
-    private String name;
 
     @OneToMany(mappedBy = "calendar")
     private List<CareAssignment> careAssignments;
-
     // CareAssignment 리스트 설정 메서드
     public void setCareAssignments(List<CareAssignment> careAssignments) {
         this.careAssignments = careAssignments;
