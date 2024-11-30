@@ -5,9 +5,12 @@ import com.example._2024_danpoong_team_39_be.domain.CareAssignment;
 import com.example._2024_danpoong_team_39_be.domain.CareRecipient;
 import com.example._2024_danpoong_team_39_be.domain.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,8 +19,7 @@ public interface CareAssignmentRepository extends JpaRepository<CareAssignment, 
 
     Optional<CareAssignment> findById(Long id);
 
-  //  boolean existsByMemberAndRecipientAndRelationship(Member member, CareRecipient recipient, String relationship);
 
-
+    Optional<CareAssignment> findByEmail(String email);
 
 }

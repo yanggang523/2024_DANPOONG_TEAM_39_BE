@@ -89,9 +89,6 @@ public class CareRecipentService {
 
         // 6. CareAssignment 생성
         CareAssignment careAssignment = CareAssignment.create(member, careRecipient, relationship);
-        careAssignment.setMember(member);
-        careAssignment.setRecipient(careRecipient);
-        careAssignment.setRelationship(relationship);
 
         // 7. CareRecipient에 CareAssignment 추가 (양방향 관계 설정)
         careRecipient.addCareAssignment(careAssignment);
@@ -100,7 +97,9 @@ public class CareRecipentService {
         careRecipientRepository.save(careRecipient); // CareRecipient 저장
         careAssignmentRepository.save(careAssignment); // CareAssignment 저장
 
+
         log.info("CareRecipient 및 CareAssignment 저장 완료: {}, {}", careRecipient, careAssignment);
         return careRecipient;
     }
+
 }

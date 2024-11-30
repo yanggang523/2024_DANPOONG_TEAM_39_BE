@@ -8,6 +8,9 @@ import lombok.*;
 import net.minidev.json.annotate.JsonIgnore;
 
 import java.util.Set;
+import jakarta.persistence.*;
+import lombok.*;
+import net.minidev.json.annotate.JsonIgnore;
 
 // Member domain
 @Setter

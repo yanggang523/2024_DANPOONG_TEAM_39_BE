@@ -19,7 +19,6 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableWebSecurity
 public class SecurityConfig {
 
-
     private final JwtUtil jwtUtil;
     private final JWTAuthenticationFilter jwtAuthenticationFilter;
 
@@ -41,11 +40,13 @@ public class SecurityConfig {
                                 .requestMatchers(SecurityConstants.ALLOW_URLS).permitAll()  // 공개 URL 설정
                                 .requestMatchers("/api/careCalendar/**").permitAll()
                                 .anyRequest().authenticated()  // 나머지 요청은 인증 필요
+
                 )
                 .formLogin(AbstractHttpConfigurer::disable)  // 폼 로그인 비활성화
                 .httpBasic(AbstractHttpConfigurer::disable)  // HTTP Basic 인증 비활성화
                 .cors(withDefaults())  // CORS 설정 활성화
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // JWT 필터 추가
+
 
 
         return http.build();

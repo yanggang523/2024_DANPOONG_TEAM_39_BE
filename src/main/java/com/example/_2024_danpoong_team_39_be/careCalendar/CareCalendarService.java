@@ -6,6 +6,8 @@ import com.example._2024_danpoong_team_39_be.calendar.CalendarRepository;
 import com.example._2024_danpoong_team_39_be.careAssignment.CareAssignmentRepository;
 import com.example._2024_danpoong_team_39_be.domain.CareAssignment;
 import com.example._2024_danpoong_team_39_be.domain.CareRecipient;
+
+import com.example._2024_danpoong_team_39_be.domain.Member;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+//돌봄일정인 경우 같은 어르신을 둔 경우 자유롭게 crud가능
 @Service
 public class CareCalendarService {
     @Autowired
@@ -29,7 +32,9 @@ public class CareCalendarService {
     public List<Calendar> getAllSharedCalendars() {
         return calendarRepository.findByIsSharedTrue();  // isShared가 true인 모든 일정 조회
     }
-
+    public List<CareAssignment> getCareAssignments() {
+        return careAssignmentRepository.findAll(); // careAssignmentRepository는 실제 데이터베이스에서 데이터를 가져오는 역할을 합니다.
+    }
     @Transactional
     public Calendar createCalendarForAssignment(Long careAssignmentId, Calendar calendar) {
         // 로그 추가
@@ -56,6 +61,7 @@ public class CareCalendarService {
             for (LocalDate repeatDate : repeatDates) {
                 Calendar repeatEvent = new Calendar();
                 repeatEvent.setDate(repeatDate);
+                repeatEvent.setIsAlarm(calendar.getIsAlarm());
                 repeatEvent.setTitle(calendar.getTitle());
                 repeatEvent.setEventType(calendar.getEventType());
                 repeatEvent.setStartTime(calendar.getStartTime());
@@ -77,6 +83,7 @@ public class CareCalendarService {
             if (calendar.getDate() == null) {
                 calendar.setDate(LocalDate.now()); // 기본 날짜 설정
             }
+
 
             if (Boolean.TRUE.equals(calendar.getIsShared())) {
                 calendar.setCareAssignment(careAssignment); // 여기에 CareAssignment 설정
