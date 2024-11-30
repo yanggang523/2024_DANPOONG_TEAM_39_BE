@@ -20,7 +20,7 @@ public class CareAssignment {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_id", unique = true, nullable = false)
     private Member member;
 
     @JsonIgnore  // 이 필드는 직렬화 시 무시됩니다.
