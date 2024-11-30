@@ -1,6 +1,7 @@
 package com.example._2024_danpoong_team_39_be.calendar;
 
 
+import com.example._2024_danpoong_team_39_be.careAssignment.CareAssignmentRepository;
 import com.example._2024_danpoong_team_39_be.careCalendar.hospital.Hospital;
 import com.example._2024_danpoong_team_39_be.careCalendar.meal.Meal;
 import com.example._2024_danpoong_team_39_be.careCalendar.medication.Medication;
@@ -81,11 +82,11 @@ public class Calendar {
 
     private String category;
 
-
     @OneToMany(mappedBy = "calendar")
     private List<CareAssignment> careAssignments;
     // CareAssignment 리스트 설정 메서드
     public void setCareAssignments(List<CareAssignment> careAssignments) {
         this.careAssignments = careAssignments;
+
     }
 }

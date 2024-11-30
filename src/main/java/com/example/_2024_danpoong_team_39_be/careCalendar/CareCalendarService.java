@@ -6,6 +6,7 @@ import com.example._2024_danpoong_team_39_be.calendar.CalendarRepository;
 import com.example._2024_danpoong_team_39_be.careAssignment.CareAssignmentRepository;
 import com.example._2024_danpoong_team_39_be.domain.CareAssignment;
 import com.example._2024_danpoong_team_39_be.domain.CareRecipient;
+
 import com.example._2024_danpoong_team_39_be.domain.Member;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +16,13 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 //돌봄일정인 경우 같은 어르신을 둔 경우 자유롭게 crud가능
 @Service
-public class CareCalendarService
-{
+public class CareCalendarService {
     @Autowired
     private CalendarRepository calendarRepository;
     @Autowired
@@ -82,6 +83,7 @@ public class CareCalendarService
             if (calendar.getDate() == null) {
                 calendar.setDate(LocalDate.now()); // 기본 날짜 설정
             }
+
 
             if (Boolean.TRUE.equals(calendar.getIsShared())) {
                 calendar.setCareAssignment(careAssignment); // 여기에 CareAssignment 설정

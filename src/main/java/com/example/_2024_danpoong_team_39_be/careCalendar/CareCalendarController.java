@@ -4,6 +4,7 @@ package com.example._2024_danpoong_team_39_be.careCalendar;
 import com.example._2024_danpoong_team_39_be.calendar.Calendar;
 import com.example._2024_danpoong_team_39_be.calendar.CalendarRepository;
 import com.example._2024_danpoong_team_39_be.careAssignment.CareAssignmentRepository;
+
 import com.example._2024_danpoong_team_39_be.careAssignment.CareAssignmentService;
 import com.example._2024_danpoong_team_39_be.careCalendar.hospital.TransportationTpye;
 import com.example._2024_danpoong_team_39_be.careCalendar.meal.MealType;
@@ -25,12 +26,16 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/careCalendar")
 public class CareCalendarController {
+
+    @Autowired
+    private CareAssignmentRepository careAssignmentRepository;
     @Autowired
     private CareAssignmentRepository careAssignmentRepository;
     @Autowired
     private CareCalendarService careCalendarService;
     @Autowired
     private CalendarRepository calendarRepository;
+
     @Autowired
     private CareAssignmentService careAssignmentService;
 
@@ -50,6 +55,7 @@ public class CareCalendarController {
         // 조회된 캘린더 반환
         return calendar;
     }
+
     @GetMapping("/dolbomiList")
     public List<CareAssignment> getDolbomiList() {
         // DB에서 모든 CareAssignment 가져오기
@@ -300,11 +306,13 @@ public class CareCalendarController {
         if (calendar.getCategory() == null || calendar.getCategory().isEmpty()) {
             calendar.setCategory("rest");
         }
+
         // CareAssignment를 Calendar에 설정
         calendar.setCareAssignment(careAssignment);
 
         // Calendar 저장
         return careCalendarService.createCalendarForAssignment(careAssignmentId, calendar);
+
     }
 
     @PostMapping("/hospital")
