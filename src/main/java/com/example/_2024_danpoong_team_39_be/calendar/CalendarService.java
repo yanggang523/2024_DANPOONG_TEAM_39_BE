@@ -2,128 +2,81 @@ package com.example._2024_danpoong_team_39_be.calendar;
 
 import com.example._2024_danpoong_team_39_be.careAssignment.CareAssignmentRepository;
 import com.example._2024_danpoong_team_39_be.domain.CareAssignment;
-import com.example._2024_danpoong_team_39_be.domain.CareRecipient;
+import com.example._2024_danpoong_team_39_be.login.util.JwtUtil;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CalendarService {
-    @Autowired
-    private CalendarRepository calendarRepository;
+    private final CalendarRepository calendarRepository;
+    private final CareAssignmentRepository careAssignmentRepository;
+    private final JwtUtil jwtUtil;
 
     @Autowired
-    private CareAssignmentRepository careAssignmentRepository;
-    // careAssignmentId로 해당 CareAssignment 객체 조회
-// 특정 날짜의 세부 일정 조회
-    public List<Calendar> getDailyDetailEvents(LocalDate date, Long id) {
-        return calendarRepository.findByDateAndId(date, id);
-    }
-    // 특정 날짜의 일정 조회
-    public List<Calendar> getDailyEventsForMembers(Long id, LocalDate date) {
-        return calendarRepository.findCalendarByCareAssignmentIdAndDate(id, date);
+    public CalendarService(CalendarRepository calendarRepository,
+                           CareAssignmentRepository careAssignmentRepository,
+                           JwtUtil jwtUtil) {
+        this.calendarRepository = calendarRepository;
+        this.careAssignmentRepository = careAssignmentRepository;
+        this.jwtUtil = jwtUtil;
     }
 
-    // 일정 추가
-    public Calendar addEvent(Calendar calendar) {
-        // CareAssignment가 존재하는지 확인
+    @Transactional
+    public Calendar createCalendar(String token, CalendarDTO calendarDTO) {
+        // 토큰에서 이메일 추출
+        String email = jwtUtil.getEmailFromToken(token);
 
+        // 이메일을 통해 CareAssignment 조회
+        CareAssignment careAssignment = careAssignmentRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("해당 이메일을 사용하는 CareAssignment를 찾을 수 없습니다: " + email));
 
-        // 시간 충돌 검사
-        if (isTimeConflict(calendar)) {
-            throw new IllegalArgumentException("해당 시간대에 이미 일정이 존재합니다.");
-        }
-        // 종일선택시 starttime  수면시작시간 , endTime - 수면종료시간
+        // Calendar 생성
+        Calendar calendar = new Calendar();
+        calendar.setTitle(calendarDTO.getTitle());
+        calendar.setEventType(calendarDTO.getEventType());
+        calendar.setStartTime(calendarDTO.getStartTime());
+        calendar.setEndTime(calendarDTO.getEndTime());
+        calendar.setDate(calendarDTO.getDate());
+        calendar.setIsAllday(calendarDTO.getIsAllday());
+        calendar.setIsAlarm(calendarDTO.getIsAlarm());
+        calendar.setLocation(calendarDTO.getLocation());
+        calendar.setMemo(calendarDTO.getMemo());
+        calendar.setCareAssignment(careAssignment);  // CareAssignment와 연결
 
-        if (Boolean.TRUE.equals(calendar.getIsAllday())) {
-            calendar.setStartTime(calendar.getCareAssignment().getRecipient().getStartSleepTime());
-            calendar.setEndTime(calendar.getCareAssignment().getRecipient().getEndSleepTime());
-        }
-
-        // 주기 설정에 따라 일정 시작 날짜를 자동으로 생성
-        if (calendar.getRepeatCycle() != null) {
-            LocalDate startDate = calendar.getDate(); // startDate 가져오기
-
-            if (startDate == null) {
-                throw new IllegalArgumentException("반복 일정은 시작 날짜(startDate)가 필요합니다.");
-            }
-
-            // 반복 주기에 따라 일정 리스트 생성
-            List<LocalDate> repeatDates = generateRepeatDates(startDate, calendar.getRepeatCycle());
-
-            // 반복 일정 저장
+        // 반복 일정 처리
+        if (calendarDTO.getRepeatCycle() != null) {
+            // 반복 일정 날짜 생성
+            List<LocalDate> repeatDates = generateRepeatDates(calendarDTO.getDate(), calendarDTO.getRepeatCycle());
             for (LocalDate repeatDate : repeatDates) {
                 Calendar repeatEvent = new Calendar();
+                repeatEvent.setTitle(calendarDTO.getTitle());
+                repeatEvent.setEventType(calendarDTO.getEventType());
+                repeatEvent.setStartTime(calendarDTO.getStartTime());
+                repeatEvent.setEndTime(calendarDTO.getEndTime());
                 repeatEvent.setDate(repeatDate);
-                repeatEvent.setName(calendar.getName());
-                repeatEvent.setEventType(calendar.getEventType());
-                repeatEvent.setStartTime(calendar.getStartTime());
-                repeatEvent.setEndTime(calendar.getEndTime());
-                repeatEvent.setName(calendar.getCareAssignment().getMember().getAlias());
-                repeatEvent.setTitle(calendar.getTitle());
-                repeatEvent.setIsAllday(calendar.getIsAllday());
-                repeatEvent.setMemo(calendar.getMemo());
-                repeatEvent.setLocation(calendar.getLocation());
-                repeatEvent.setRepeatCycle(calendar.getRepeatCycle());
-                repeatEvent.setIsShared(calendar.getIsShared());
-                repeatEvent.setCategory(calendar.getCategory());
-                repeatEvent.setIsAllday(calendar.getIsAllday());
-                repeatEvent.setMeal(calendar.getMeal());
-                repeatEvent.setHospital(calendar.getHospital());
-                repeatEvent.setRest(calendar.getRest());
-                repeatEvent.setMedication(calendar.getMedication());
-
-
-
-                // 시간 충돌 검사
-                if (isTimeConflict(repeatEvent)) {
-                    throw new IllegalArgumentException("반복 일정 중 일부가 이미 존재하는 일정과 겹칩니다.");
-                }
+                repeatEvent.setIsAllday(calendarDTO.getIsAllday());
+                repeatEvent.setIsAlarm(calendarDTO.getIsAlarm());
+                repeatEvent.setLocation(calendarDTO.getLocation());
+                repeatEvent.setMemo(calendarDTO.getMemo());
+                repeatEvent.setIsShared(calendarDTO.getIsShared());
+                repeatEvent.setCareAssignment(careAssignment); // CareAssignment 설정
+                repeatEvent.setRepeatCycle(calendarDTO.getRepeatCycle()); // 반복 주기 설정
 
                 // 반복 일정 저장
                 calendarRepository.save(repeatEvent);
             }
-
-            // 반복 일정 확인
-            System.out.println("반복 일정: " + repeatDates);
         } else {
-            // 반복 주기가 없을 경우, 시작 날짜만 설정
-            if (calendar.getDate() == null) {
-                calendar.setDate(LocalDate.now());
-            }
-
-
-            // 일정 저장
+            // 단일 일정 저장
             calendarRepository.save(calendar);
         }
 
-        // isShared가 true일 때 카테고리와 관련된 필드 체크
-        if (Boolean.TRUE.equals(calendar.getIsShared())) {
-            validateSharedEventFields(calendar);
-        } else {
-            // isShared가 false일 경우 관련 필드들을 null로 초기화
-            resetSharedEventFields(calendar);
-        }
-
-        return calendar;  // 추가된 일정 객체를 반환
+        return calendar;
     }
-
-    // 시간 충돌 검사 메서드
-    private boolean isTimeConflict(Calendar calendar) {
-        LocalTime adjustedStartTime = calendar.getStartTime();
-        LocalTime adjustedEndTime = calendar.getEndTime();
-
-        List<Calendar> conflictingEvents = calendarRepository.findByDateAndStartTimeLessThanAndEndTimeGreaterThan(
-                calendar.getDate(), adjustedEndTime, adjustedStartTime);
-        return !conflictingEvents.isEmpty();
-    }
-
 
     // 반복 주기에 따라 날짜 리스트 생성
     private List<LocalDate> generateRepeatDates(LocalDate startDate, Calendar.RepeatCycle repeatCycle) {
@@ -148,141 +101,114 @@ public class CalendarService {
         return repeatDates;
     }
 
-    private void validateSharedEventFields(Calendar calendar) {
-        if (calendar.getCategory() == null) {
-            throw new IllegalArgumentException("공유 일정일 경우 카테고리를 선택해야 합니다.");
-        }
 
-        switch (calendar.getCategory()) {
-            case "meal":
-                if (calendar.getMeal() == null || calendar.getMeal().getMealType() == null) {
-                    throw new IllegalArgumentException("Meal 카테고리에는 mealType을 지정해야 합니다.");
-                }
-                break;
-            case "hospital":
-                if (calendar.getHospital() == null || calendar.getHospital().getTransportationTpye() == null) {
-                    throw new IllegalArgumentException("Hospital 카테고리에는 transportationType을 지정해야 합니다.");
-                }
-                break;
-            case "rest":
-                if (calendar.getRest() == null || calendar.getRest().getRestType() == null) {
-                    throw new IllegalArgumentException("Rest 카테고리에는 restType을 지정해야 합니다.");
-                }
-                break;
-            case "medication":
-                if (calendar.getMedication() == null || calendar.getMedication().getMedicationType() == null) {
-                    throw new IllegalArgumentException("Medication 카테고리에는 medicationType을 지정해야 합니다.");
-                }
-                break;
-            case "others":
-                break;
-            case "myCalendar":
-                break;
-            default:
-                throw new IllegalArgumentException("유효하지 않은 카테고리입니다.");
-        }
+    @Transactional
+    public List<Calendar> getAllCalendarsForAssignment(Long careAssignmentId) {
+        // CareAssignment를 ID로 조회
+        CareAssignment careAssignment = careAssignmentRepository.findById(careAssignmentId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 CareAssignment를 찾을 수 없습니다: " + careAssignmentId));
+
+        // CareAssignment에 연결된 모든 일정 조회
+        List<Calendar> calendars = calendarRepository.findByCareAssignment(careAssignment);
+
+        // 결과 반환
+        return calendars;
     }
 
-    private void resetSharedEventFields(Calendar calendar) {
-        calendar.setCategory(null);
-        calendar.setMeal(null);
-        calendar.setHospital(null);
-        calendar.setRest(null);
-        calendar.setMedication(null);
-    }
 
-    // 일정 수정
-    public Calendar updateEvent(Long id, Calendar updatedCalendar) {
-        Optional<Calendar> existingCalendar = calendarRepository.findById(id);
-        if (existingCalendar.isPresent()) {
-            Calendar calendar = existingCalendar.get();
 
-            if (calendar.getId().equals(id)) {
-                if (isTimeConflict(updatedCalendar)) {
-                    throw new IllegalArgumentException("해당 시간대에 이미 일정이 존재합니다.");
-                }
+    @Transactional
+    public Calendar updateCalendarPartial(Long calendarId, String token, CalendarDTO calendarDTO) {
+        // 토큰에서 이메일 추출
+        String email = jwtUtil.getEmailFromToken(token);
 
-                if (updatedCalendar.getTitle() != null) {
-                    calendar.setTitle(updatedCalendar.getTitle());
-                }
-                if (updatedCalendar.getEventType() != null) {
-                    calendar.setEventType(updatedCalendar.getEventType());
-                }
-                if (updatedCalendar.getStartTime() != null) {
-                    calendar.setStartTime(updatedCalendar.getStartTime());
-                }
-                if (updatedCalendar.getEndTime() != null) {
-                    calendar.setEndTime(updatedCalendar.getEndTime());
-                }
-                if (updatedCalendar.getLocation() != null) {
-                    calendar.setLocation(updatedCalendar.getLocation());
-                }
-                if (updatedCalendar.getMemo() != null) {
-                    calendar.setMemo(updatedCalendar.getMemo());
-                }
-                if(updatedCalendar.getIsAllday() != null){
-                    calendar.setIsAllday(updatedCalendar.getIsAllday());
-                }
-                if (updatedCalendar.getRepeatCycle() != null) {
-                    LocalDate startDate = updatedCalendar.getDate();
+        // 이메일을 통해 CareAssignment 조회
+        CareAssignment careAssignment = careAssignmentRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("해당 이메일을 사용하는 CareAssignment를 찾을 수 없습니다: " + email));
 
-                    if (startDate == null) {
-                        throw new IllegalArgumentException("반복 일정은 startDate가 필요합니다.");
-                    }
+        // 기존 Calendar 객체 조회
+        Calendar existingCalendar = calendarRepository.findById(calendarId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 Calendar를 찾을 수 없습니다: " + calendarId));
 
-                    switch (updatedCalendar.getRepeatCycle()) {
-                        case WEEKLY:
-                            List<LocalDate> repeatDates = new ArrayList<>();
-                            for (int i = 0; i < 7; i++) {
-                                repeatDates.add(startDate.plusDays(i));
-                            }
-                            break;
-                        case DAILY:
-                            break;
-                        case MONTHLY:
-                            List<LocalDate> monthlyDates = new ArrayList<>();
-                            for (int i = 0; i < 30; i++) {
-                                monthlyDates.add(startDate.plusDays(i));
-                            }
-                            break;
-                        default:
-                            throw new IllegalArgumentException("지원되지 않는 반복 주기입니다.");
-                    }
-                } else {
-                    LocalDate today = LocalDate.now();
-                    calendar.setDate(today);
-                }
 
-                if (updatedCalendar.getIsAlarm() != null) {
-                    calendar.setIsAlarm(updatedCalendar.getIsAlarm());
-                }
-                if (updatedCalendar.getIsShared() != null) {
-                    calendar.setIsShared(updatedCalendar.getIsShared());
+        // CalendarDTO에서 수정된 필드만 업데이트
+        if (calendarDTO.getTitle() != null) {
+            existingCalendar.setTitle(calendarDTO.getTitle());
+        }
+        if (calendarDTO.getEventType() != null) {
+            existingCalendar.setEventType(calendarDTO.getEventType());
+        }
+        if (calendarDTO.getStartTime() != null) {
+            existingCalendar.setStartTime(calendarDTO.getStartTime());
+        }
+        if (calendarDTO.getEndTime() != null) {
+            existingCalendar.setEndTime(calendarDTO.getEndTime());
+        }
+        if (calendarDTO.getDate() != null) {
+            existingCalendar.setDate(calendarDTO.getDate());
+        }
+        if (calendarDTO.getIsAllday() != null) {
+            existingCalendar.setIsAllday(calendarDTO.getIsAllday());
+        }
+        if (calendarDTO.getIsAlarm() != null) {
+            existingCalendar.setIsAlarm(calendarDTO.getIsAlarm());
+        }
+        if (calendarDTO.getLocation() != null) {
+            existingCalendar.setLocation(calendarDTO.getLocation());
+        }
+        if (calendarDTO.getMemo() != null) {
+            existingCalendar.setMemo(calendarDTO.getMemo());
+        }
 
-                    if (updatedCalendar.getIsShared()) {
-                        if (updatedCalendar.getCategory() == null) {
-                            throw new IllegalArgumentException("공유 일정일 경우 카테고리를 선택해야 합니다.");
-                        }
+        // 반복 일정 처리 (필요한 경우만 수정)
+        if (calendarDTO.getRepeatCycle() != null) {
+            // 기존 반복 일정을 삭제하고 새로 생성
+            List<LocalDate> repeatDates = generateRepeatDates(calendarDTO.getDate(), calendarDTO.getRepeatCycle());
+            for (LocalDate repeatDate : repeatDates) {
+                Calendar repeatEvent = new Calendar();
+                repeatEvent.setTitle(existingCalendar.getTitle());
+                repeatEvent.setEventType(existingCalendar.getEventType());
+                repeatEvent.setStartTime(existingCalendar.getStartTime());
+                repeatEvent.setEndTime(existingCalendar.getEndTime());
+                repeatEvent.setDate(repeatDate);
+                repeatEvent.setIsAllday(existingCalendar.getIsAllday());
+                repeatEvent.setIsAlarm(existingCalendar.getIsAlarm());
+                repeatEvent.setLocation(existingCalendar.getLocation());
+                repeatEvent.setMemo(existingCalendar.getMemo());
+                repeatEvent.setCareAssignment(careAssignment);
+                repeatEvent.setRepeatCycle(calendarDTO.getRepeatCycle());
 
-                        validateSharedEventFields(updatedCalendar);
-                    } else {
-                        resetSharedEventFields(updatedCalendar);
-                    }
-                }
-
-                return calendarRepository.save(calendar);
+                // 반복 일정 저장
+                calendarRepository.save(repeatEvent);
             }
         }
-        return null;
+
+        // 업데이트된 일정 저장
+        calendarRepository.save(existingCalendar);
+
+        return existingCalendar;
     }
 
-    // 일정 삭제
-    public void deleteEvent(Long id) {
-        Optional<Calendar> calendar = calendarRepository.findById(id);
-        if (calendar.isPresent()) {
-            calendarRepository.delete(calendar.get());
-        } else {
-            throw new IllegalArgumentException("일정을 찾을 수 없습니다.");
+
+    @Transactional
+    public void deleteCalendar(Long calendarId, String token) {
+        // 토큰에서 이메일 추출
+        String email = jwtUtil.getEmailFromToken(token);
+
+        // 이메일을 통해 CareAssignment 조회
+        CareAssignment careAssignment = careAssignmentRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("해당 이메일을 사용하는 CareAssignment를 찾을 수 없습니다: " + email));
+
+        // 해당 Calendar 조회
+        Calendar calendar = calendarRepository.findById(calendarId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 일정을 찾을 수 없습니다: " + calendarId));
+
+        // 해당 CareAssignment와 일정을 연결한 후 삭제 권한 확인
+        if (!calendar.getCareAssignment().equals(careAssignment)) {
+            throw new IllegalArgumentException("이 일정을 삭제할 권한이 없습니다.");
         }
+
+        // Calendar 삭제
+        calendarRepository.delete(calendar);
     }
 }

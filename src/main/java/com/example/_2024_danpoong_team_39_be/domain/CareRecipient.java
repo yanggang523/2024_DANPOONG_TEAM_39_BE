@@ -16,6 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 public class CareRecipient {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -39,6 +40,7 @@ public class CareRecipient {
 
     // 연관관계
     @OneToMany(mappedBy = "recipient")
+    @Builder.Default
     private List<CareAssignment> careAssignment = new ArrayList<>();
 
     // 프로필 이미지 없습니다! (추후 추가 예정)
@@ -53,6 +55,10 @@ public class CareRecipient {
         this.address = address;
         this.avgSleepTime = avgSleepTime;
     }
-
+    // 양방향 관계 설정 메서드
+    public void addCareAssignment(CareAssignment assignment) {
+        careAssignment.add(assignment);
+        assignment.setRecipient(this); // 양방향 관계 유지
+    }
 }
 

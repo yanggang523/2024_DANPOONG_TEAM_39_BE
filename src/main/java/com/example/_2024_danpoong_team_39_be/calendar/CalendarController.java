@@ -1,78 +1,76 @@
 package com.example._2024_danpoong_team_39_be.calendar;
 
 import com.example._2024_danpoong_team_39_be.domain.CareAssignment;
+import com.example._2024_danpoong_team_39_be.login.BaseResponse;
+import com.example._2024_danpoong_team_39_be.login.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/calendar")
 public class CalendarController {
+    private final CalendarService calendarService;
     @Autowired
-    private CalendarService careAssignmentService;
+    private JwtUtil jwtUtil;
 
-    @Autowired
-    private CalendarRepository calendarRepository;
-    // 특정 날짜의 세부 일정 조회(1개) 작동 o
-    @GetMapping("/{date}/events/{eventId}")
-    public List<Calendar> getDailyDetailEvents(@PathVariable LocalDate date, @PathVariable Long eventId) {
-        return careAssignmentService.getDailyDetailEvents(date, eventId);
+    public CalendarController(CalendarService calendarService) {
+        this.calendarService = calendarService;
     }
-    // 특정 날짜의 일정 리스트 조회(ex 2024-11-23에 있는 모든 a의 일정)
-    @GetMapping("/{careAssignmentId}/{date}")
-    public List<Calendar> getDailyEventsForMembers(@RequestParam Long careAssignmentId, @PathVariable LocalDate date) {
-        return careAssignmentService.getDailyEventsForMembers(careAssignmentId, date);
+//    내일정 캘린더 폼
+    @GetMapping("")
+    public CalendarDTO showCalendarForm() {
+        // 빈 CalendarDTO 객체를 반환
+        CalendarDTO calendarDTO = new CalendarDTO();
+        return calendarDTO;
     }
-    // 회원별로 일정 리스트 조회 회원 아이디를
-    @GetMapping("/{careAssignmentId}/events")
-    public ResponseEntity<List<Calendar>> getEventsByMember(@PathVariable Long careAssignmentId) {
-        // 해당 회원의 일정을 조회
-        List<Calendar> calendars = calendarRepository.findCalendarByCareAssignmentId(careAssignmentId);
-        return ResponseEntity.ok(calendars);
-    }
+//    캘린더 저장
+    @PostMapping
+    public BaseResponse<CalendarDTO> createCalendar(@RequestHeader("Authorization") String token,
+                                                    @RequestBody CalendarDTO calendarDTO) {
+        // Calendar 객체를 생성하는 서비스 호출
+        Calendar calendar = calendarService.createCalendar(token, calendarDTO);
+        if (calendar.getIsShared() == null) {
+            calendar.setIsShared(false);  // true로 설정
+        }
 
-    // 일정 추가
-    @PostMapping("")
-    public ResponseEntity<Calendar> addEvent(@RequestBody Calendar calendar) {
-        try {
-            if (calendar.getIsShared() == null) {
-            calendar.setIsShared(false);
-        }
-        if (calendar.getCategory() == null || calendar.getCategory().isEmpty()) {
-            calendar.setCategory("myCalendar");
-        }
-            Calendar savedCalendar = careAssignmentService.addEvent(calendar);
-            return ResponseEntity.ok(savedCalendar);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(null); // 잘못된 요청 처리
-        }
-    }
-    // 일정 수정
-    @PatchMapping("/events/{eventId}")
-    public ResponseEntity<Calendar> partialUpdateEvent(@PathVariable Long eventId, @RequestBody Calendar updatedCalendar) {
-        try {
-            Calendar updatedEvent = careAssignmentService.updateEvent(eventId, updatedCalendar);
-            if (updatedEvent != null) {
-                return ResponseEntity.ok(updatedEvent);
-            } else {
-                return ResponseEntity.notFound().build();
-            }
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(null);
-        }
+        // 생성된 Calendar 객체를 CalendarDTO로 변환하여 반환
+        return BaseResponse.onSuccess(CalendarConverter.toCalendarDTO(calendar));
     }
 
+//돌보미 1명의 전체 캘린더 조회
+    @GetMapping("/{careAssignmentId}")
+    public BaseResponse<List<CalendarDTO>> getAllCalendarsForAssignment(@PathVariable Long careAssignmentId) {
+        // CareAssignment에 속한 모든 일정 조회
+        List<Calendar> calendars = calendarService.getAllCalendarsForAssignment(careAssignmentId);
+
+        // DTO로 변환하여 반환
+        List<CalendarDTO> calendarDTOs = CalendarConverter.toCalendarDTOList(calendars);
+
+        return BaseResponse.onSuccess(calendarDTOs);
+    }
+
+
+    // 일정 수정 (부분 수정)
+    @PatchMapping("/{calendarId}")
+    public BaseResponse<CalendarDTO> updateCalendar(@PathVariable Long calendarId,
+                                                    @RequestHeader("Authorization") String token,
+                                                    @RequestBody CalendarDTO calendarDTO) {
+        // 부분 수정에 대한 로직
+        Calendar updatedCalendar = calendarService.updateCalendarPartial(calendarId, token, calendarDTO);
+        return BaseResponse.onSuccess(CalendarConverter.toCalendarDTO(updatedCalendar));
+    }
+
+    //
     // 일정 삭제
-    @DeleteMapping("/events/{eventId}")
-    public ResponseEntity<Void> deleteEvent(@PathVariable Long eventId) {
-        try {
-            careAssignmentService.deleteEvent(eventId);
-            return ResponseEntity.noContent().build(); // 삭제 성공 시 204 반환
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build(); // 일정이 존재하지 않으면 404 반환
-        }
+    @DeleteMapping("/{calendarId}")
+    public BaseResponse<Void> deleteCalendar(@PathVariable Long calendarId,
+                                             @RequestHeader("Authorization") String token) {
+        calendarService.deleteCalendar(calendarId, token);
+        return BaseResponse.onSuccess(null);
     }
+//}
+
+
 }

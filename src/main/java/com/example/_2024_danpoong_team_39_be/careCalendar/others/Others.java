@@ -14,7 +14,8 @@ public class Others {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private boolean caregiver;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "calendar_id")  // This will fillUpMember the "Calendar" entity
     private Calendar calendar;
+    private String othersType;
 }
