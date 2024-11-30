@@ -78,14 +78,14 @@ public class CareRecipentService {
         }
 
         // 5. CareAssignment 중복 확인
-        boolean isAssignmentExists = careAssignmentRepository.existsByMemberAndRecipientAndRelationship(
-                member, careRecipient, relationship
-        );
+//        boolean isAssignmentExists = careAssignmentRepository.existsByMemberAndRecipientAndRelationship(
+//                member, careRecipient, relationship
+//        );
 
-        if (isAssignmentExists) {
-            throw new IllegalStateException("이미 존재하는 CareAssignment입니다: Member = " + member.getId() +
-                    ", CareRecipient = " + careRecipient.getId() + ", Relationship = " + relationship);
-        }
+//        if (isAssignmentExists) {
+//            throw new IllegalStateException("이미 존재하는 CareAssignment입니다: Member = " + member.getId() +
+//                    ", CareRecipient = " + careRecipient.getId() + ", Relationship = " + relationship);
+//        }
 
         // 6. CareAssignment 생성
         CareAssignment careAssignment = CareAssignment.create(member, careRecipient, relationship);
