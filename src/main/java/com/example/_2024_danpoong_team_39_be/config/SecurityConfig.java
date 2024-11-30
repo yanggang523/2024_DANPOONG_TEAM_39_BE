@@ -39,6 +39,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers(SecurityConstants.ALLOW_URLS).permitAll()  // 공개 URL 설정
+                                .requestMatchers("/api/careCalendar/**").permitAll()
                                 .anyRequest().authenticated()  // 나머지 요청은 인증 필요
                 )
                 .formLogin(AbstractHttpConfigurer::disable)  // 폼 로그인 비활성화
