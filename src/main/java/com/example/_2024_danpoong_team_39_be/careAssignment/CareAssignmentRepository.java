@@ -2,6 +2,8 @@ package com.example._2024_danpoong_team_39_be.careAssignment;
 
 import com.example._2024_danpoong_team_39_be.calendar.Calendar;
 import com.example._2024_danpoong_team_39_be.domain.CareAssignment;
+import com.example._2024_danpoong_team_39_be.domain.CareRecipient;
+import com.example._2024_danpoong_team_39_be.domain.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,15 +19,7 @@ public interface CareAssignmentRepository extends JpaRepository<CareAssignment, 
 
     Optional<CareAssignment> findById(Long id);
 
+
     Optional<CareAssignment> findByEmail(String email);
 
-//    Optional<CareAssignment> findByEmail(String email);  // 이메일로 CareAssignment 조회
-//    @Query("SELECT ca FROM CareAssignment ca " +
-//            "JOIN ca.calendars c " +
-//            "WHERE c.date = :date " +
-//            "AND c.startTime BETWEEN :startTime AND :endTime " +
-//            "OR c.endTime BETWEEN :startTime AND :endTime")
-//    List<CareAssignment> findCareAssignmentsByDateAndTimeRange(@Param("date") LocalDate date,
-//                                                               @Param("startTime") LocalTime startTime,
-//                                                               @Param("endTime") LocalTime endTime);
 }

@@ -13,6 +13,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import com.example._2024_danpoong_team_39_be.Constants.SecurityConstants;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -37,12 +39,12 @@ public class SecurityConfig {
                         authorizeRequests
                                 .requestMatchers(SecurityConstants.ALLOW_URLS).permitAll()  // 공개 URL 설정
                                 .requestMatchers("/api/careCalendar/**").permitAll()
-                                .requestMatchers("/api/calendar/**").permitAll()
-                                .requestMatchers("/api/recommendation/**").permitAll()
-                                .anyRequest().permitAll()  // 나머지 요청은 인증 필요
+                                .anyRequest().authenticated()  // 나머지 요청은 인증 필요
+
                 )
                 .formLogin(AbstractHttpConfigurer::disable)  // 폼 로그인 비활성화
                 .httpBasic(AbstractHttpConfigurer::disable)  // HTTP Basic 인증 비활성화
+                .cors(withDefaults())  // CORS 설정 활성화
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // JWT 필터 추가
 
 
