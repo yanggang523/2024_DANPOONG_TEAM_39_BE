@@ -30,8 +30,6 @@ public class CareCalendarController {
     @Autowired
     private CareAssignmentRepository careAssignmentRepository;
     @Autowired
-    private CareAssignmentRepository careAssignmentRepository;
-    @Autowired
     private CareCalendarService careCalendarService;
     @Autowired
     private CalendarRepository calendarRepository;
