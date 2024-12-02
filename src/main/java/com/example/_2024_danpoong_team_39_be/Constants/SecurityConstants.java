@@ -14,7 +14,10 @@ public class SecurityConstants {
             "/api/member/signup/**",
             "/api/member/signup",
             "/favicon.ico",
-            "/error"
+            "/error",
+//            "/api/invitation/**",
+//            "/api/join",
+            "/test/**"
     };
 
 }

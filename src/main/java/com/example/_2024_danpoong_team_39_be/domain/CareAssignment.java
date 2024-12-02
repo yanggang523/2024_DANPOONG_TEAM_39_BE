@@ -1,16 +1,11 @@
 package com.example._2024_danpoong_team_39_be.domain;
 
 import com.example._2024_danpoong_team_39_be.calendar.Calendar;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.*;
 import lombok.*;
 import net.minidev.json.annotate.JsonIgnore;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter
@@ -42,7 +37,8 @@ public class CareAssignment {
     @ManyToOne
     @JoinColumn(name = "calendar_id") // The column name in the database
     private Calendar calendar;
-  
+
+
     // Constructor for CareAssignment creation
     public static CareAssignment create(Member member, CareRecipient recipient, String relationship) {
         CareAssignment careAssignment = new CareAssignment();
