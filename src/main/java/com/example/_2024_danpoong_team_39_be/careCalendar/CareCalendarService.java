@@ -14,10 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 //돌봄일정인 경우 같은 어르신을 둔 경우 자유롭게 crud가능
@@ -32,9 +29,11 @@ public class CareCalendarService {
     public List<Calendar> getAllSharedCalendars() {
         return calendarRepository.findByIsSharedTrue();  // isShared가 true인 모든 일정 조회
     }
+
     public List<CareAssignment> getCareAssignments() {
         return careAssignmentRepository.findAll(); // careAssignmentRepository는 실제 데이터베이스에서 데이터를 가져오는 역할을 합니다.
     }
+
     @Transactional
     public Calendar createCalendarForAssignment(Long careAssignmentId, Calendar calendar) {
         // 로그 추가
@@ -199,11 +198,39 @@ public class CareCalendarService {
     }
 
 
-
     @Transactional
     public void deleteCalendar(Long id) {
         Calendar calendar = calendarRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID의 일정을 찾을 수 없습니다: " + id));
         calendarRepository.delete(calendar);
     }
+
+    public String checkAvailableCaregiversForEmptySlot(LocalDate date, LocalTime startTime, LocalTime endTime) {
+        // 1. 모든 CareAssignment 가져오기
+        List<CareAssignment> allCareAssignments = careAssignmentRepository.findAll();
+
+        // 2. 특정 날짜와 시간대에 일정이 있는 CareAssignment ID 가져오기
+        List<Long> busyCaregiverIds = calendarRepository.findByDate(date).stream()
+                .filter(calendar -> !(calendar.getEndTime().isBefore(startTime) || calendar.getStartTime().isAfter(endTime)))
+                .map(calendar -> calendar.getCareAssignment().getId())
+                .distinct()
+                .toList();
+
+        // 3. 일정이 없는 CareAssignment 반환
+        List<CareAssignment> availableCaregivers = allCareAssignments.stream()
+                .filter(careAssignment -> !busyCaregiverIds.contains(careAssignment.getId()))
+                .toList();
+
+        // 4. availableCaregivers의 개수로 돌보미 유무 체크
+        if (availableCaregivers.size() > 0) {
+            return "돌보미가 있습니다";
+        } else {
+            return "돌보미가 없습니다";
+        }
+    }
+
+
+
+
+
 }
