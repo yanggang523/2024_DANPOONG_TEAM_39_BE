@@ -68,4 +68,7 @@ public class AuthController {
             return BaseResponse.onSuccess(CareRecipientConverter.toCareRecipient(careRecipient));
         }
     }
+
+    //테스트용 컨트롤러(DB에서 member 생성했을 때 토큰 반환용)
+
 }
