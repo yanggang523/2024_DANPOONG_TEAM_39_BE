@@ -26,8 +26,8 @@ public class JwtUtil {
       // 키 생성 (애플리케이션 시작 시 생성)
     private final Key secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
-    // 액세스 토큰 만료 시간 (1시간)
-    private static final long ACCESS_EXPIRATION_TIME = 1000 * 60 * 60;
+    // 액세스 토큰 만료 시간 (현재 7일)
+    private static final long ACCESS_EXPIRATION_TIME = 1000 * 60 * 60 * 24 *7;
 
     // 리프레시 토큰 만료 시간 (7일)
 

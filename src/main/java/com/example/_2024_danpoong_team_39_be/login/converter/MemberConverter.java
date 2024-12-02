@@ -10,7 +10,7 @@ import lombok.Builder;
 public class MemberConverter {
 
     // Member 객체를 UserResponseDTO.JoinResultDTO로 변환하는 메서드
-    public static MemberResponseDTO.JoinResultDTO toJoinResultDTO(Member member) {
+    public static MemberResponseDTO.JoinResultDTO toJoinResultDTO(Member member, String token) {
         if (member == null) {
             return null;
         }
@@ -19,6 +19,7 @@ public class MemberConverter {
                 .id(member.getId())
                 .email(member.getEmail())
                 .alias(member.getAlias())
+                .token(token)
                 .build();
     }
 

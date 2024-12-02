@@ -13,6 +13,7 @@ import com.example._2024_danpoong_team_39_be.domain.Member;
 import com.example._2024_danpoong_team_39_be.login.dto.MemberRequestDTO;
 import com.example._2024_danpoong_team_39_be.login.dto.MemberResponseDTO;
 import com.example._2024_danpoong_team_39_be.login.service.CareRecipentService;
+import com.example._2024_danpoong_team_39_be.login.util.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ import static org.hibernate.query.sqm.tree.SqmNode.log;
 public class AuthController {
 
     private final AuthService authService;
+    private final JwtUtil jwtUtil;
 
 
     // 멤버 추가 정보 입력
@@ -45,7 +47,9 @@ public class AuthController {
     @GetMapping("/api/member/signup")
     public BaseResponse<MemberResponseDTO.JoinResultDTO> kakaoLogin(@RequestParam("code") String accessCode, HttpServletResponse httpServletResponse) {
         Member member = authService.oAuthLogin(accessCode, httpServletResponse);
-        return BaseResponse.onSuccess(MemberConverter.toJoinResultDTO(member));
+        String token = jwtUtil.createAccessToken(member.getEmail());
+
+        return BaseResponse.onSuccess(MemberConverter.toJoinResultDTO(member, token));
     }
 
     @RequiredArgsConstructor
