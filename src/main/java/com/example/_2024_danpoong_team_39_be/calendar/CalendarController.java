@@ -9,7 +9,6 @@ import com.example._2024_danpoong_team_39_be.login.BaseResponse;
 import com.example._2024_danpoong_team_39_be.login.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController

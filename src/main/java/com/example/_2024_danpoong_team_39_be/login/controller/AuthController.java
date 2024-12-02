@@ -28,7 +28,6 @@ import static org.hibernate.query.sqm.tree.SqmNode.log;
 public class AuthController {
 
     private final AuthService authService;
-    private final CareRecipentService careRecipentService;
 
 
     // 멤버 추가 정보 입력
@@ -69,4 +68,7 @@ public class AuthController {
             return BaseResponse.onSuccess(CareRecipientConverter.toCareRecipient(careRecipient));
         }
     }
+
+    //테스트용 컨트롤러(DB에서 member 생성했을 때 토큰 반환용)
+
 }
