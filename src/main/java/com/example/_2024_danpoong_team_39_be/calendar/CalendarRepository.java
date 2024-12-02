@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,15 +44,10 @@ public interface CalendarRepository extends JpaRepository<Calendar, Long> {
 
     List<Calendar> findAllByCareAssignmentAndRepeatCycle(CareAssignment careAssignment, Calendar.RepeatCycle repeatCycle);
 
-//    List<Calendar> findByDateAndStartTimeLessThanAndEndTimeGreaterThan(LocalDate date, LocalTime adjustedEndTime, LocalTime adjustedStartTime);
-//    @Query("SELECT ca FROM CareAssignment ca " +
-//            "JOIN ca.calendars c " +
-//            "WHERE c.date = :date " +
-//            "AND (c.startTime BETWEEN :startTime AND :endTime " +
-//            "OR c.endTime BETWEEN :startTime AND :endTime)")
-//    List<CareAssignment> findCareAssignmentsByDateAndTimeRange(@Param("date") LocalDate date,
-//                                                               @Param("startTime") LocalTime startTime,
-//                                                               @Param("endTime") LocalTime endTime);
+    List<Calendar> findByIsSharedTrueOrderByStartTime();
+
+    @Query("SELECT c FROM Calendar c WHERE c.date = :date")
+    List<Calendar> findByDate(@Param("date") LocalDate date);
 
 }
 
