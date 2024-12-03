@@ -4,14 +4,14 @@ package com.example._2024_danpoong_team_39_be.login.controller;
 
 import com.example._2024_danpoong_team_39_be.domain.CareRecipient;
 import com.example._2024_danpoong_team_39_be.login.converter.CareRecipientConverter;
+import com.example._2024_danpoong_team_39_be.login.converter.MemberConverter;
 import com.example._2024_danpoong_team_39_be.login.dto.CareRecipientDTO;
 import com.example._2024_danpoong_team_39_be.login.dto.FillupResultDTO;
+import com.example._2024_danpoong_team_39_be.login.dto.MemberResponseDTO;
 import com.example._2024_danpoong_team_39_be.login.service.AuthService;
 import com.example._2024_danpoong_team_39_be.login.BaseResponse;
-import com.example._2024_danpoong_team_39_be.login.converter.MemberConverter;
 import com.example._2024_danpoong_team_39_be.domain.Member;
 import com.example._2024_danpoong_team_39_be.login.dto.MemberRequestDTO;
-import com.example._2024_danpoong_team_39_be.login.dto.MemberResponseDTO;
 import com.example._2024_danpoong_team_39_be.login.service.CareRecipentService;
 import com.example._2024_danpoong_team_39_be.login.util.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,8 +19,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import static org.hibernate.query.sqm.tree.SqmNode.log;
 
 @Slf4j
 @RestController
@@ -45,12 +43,26 @@ public class AuthController {
 
     // 카카오 로그인 (토큰 요청 후 로그인)
     @GetMapping("/api/member/signup")
-    public BaseResponse<MemberResponseDTO.JoinResultDTO> kakaoLogin(@RequestParam("code") String accessCode, HttpServletResponse httpServletResponse) {
-        Member member = authService.oAuthLogin(accessCode, httpServletResponse);
-        String token = jwtUtil.createAccessToken(member.getEmail());
-
-        return BaseResponse.onSuccess(MemberConverter.toJoinResultDTO(member, token));
+    public ResponseEntity<Void> kakaoLogin(@RequestParam("code") String accessCode, HttpServletResponse httpServletResponse) {
+        authService.oAuthLogin(accessCode, httpServletResponse);
+        return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/api/member/info")
+    public BaseResponse<MemberResponseDTO.JoinResultDTO> fillupInfo(@RequestHeader("Authorization") String token){
+        Member member = authService.memberInfo(token);
+        return BaseResponse.onSuccess(MemberConverter.toJoinResultDTO(member));
+    }
+
+    //코드짜려고 가져옴
+//    @GetMapping("/api/member/signup")
+//    public BaseResponse<MemberResponseDTO.JoinResultDTO> kakaoLogin(@RequestParam("code") String accessCode, HttpServletResponse httpServletResponse) {
+//        Member member = authService.oAuthLogin(accessCode, httpServletResponse);
+//        return BaseResponse.onSuccess(MemberConverter.toJoinResultDTO(member));
+//    }
+
+
+
 
     @RequiredArgsConstructor
     @RestController
