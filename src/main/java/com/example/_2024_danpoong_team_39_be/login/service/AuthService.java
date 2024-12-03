@@ -1,13 +1,16 @@
 package com.example._2024_danpoong_team_39_be.login.service;
 
 
+import com.example._2024_danpoong_team_39_be.domain.CareRecipient;
 import com.example._2024_danpoong_team_39_be.domain.Member;
 import com.example._2024_danpoong_team_39_be.login.converter.AuthConverter;
+import com.example._2024_danpoong_team_39_be.login.dto.CareRecipientDTO;
 import com.example._2024_danpoong_team_39_be.login.dto.KakaoDTO;
 import com.example._2024_danpoong_team_39_be.login.repository.MemberRepository;
 import com.example._2024_danpoong_team_39_be.login.util.JwtUtil;
 import com.example._2024_danpoong_team_39_be.login.util.KakaoUtil;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +51,16 @@ public class AuthService {
         return member;
 
     }
+
+    public Member memberInfo(String token) {
+       // 1. 토큰에서 이메일 추출
+        String email = jwtUtil.getEmailFromToken(token);
+        // 2. Member 검색
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("해당 이메일을 사용하는 유저를 찾을 수 없습니다: " + email));
+        return member;
+        }
+
 
     // 새 member 생성 후 DB에 저장 (email이 식별자)
     // 추후 member의 다른 값들 사용자 입력을 통해 받아야 함

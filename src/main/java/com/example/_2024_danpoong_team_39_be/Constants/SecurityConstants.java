@@ -17,7 +17,8 @@ public class SecurityConstants {
             "/error",
 //            "/api/invitation/**",
 //            "/api/join",
-            "/test/**"
+            "/test/**",
+            "api/member/info"
     };
 
 }
