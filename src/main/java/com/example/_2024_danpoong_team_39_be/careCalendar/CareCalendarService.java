@@ -36,17 +36,18 @@ public class CareCalendarService {
 
     @Transactional
     public Calendar createCalendarForAssignment(Long careAssignmentId, Calendar calendar) {
-        // 로그 추가
         System.out.println("Looking for CareAssignment with ID: " + careAssignmentId);
 
-        // careAssignmentId를 이용해 CareAssignment 조회
-        CareAssignment careAssignment = careAssignmentRepository.findById(careAssignmentId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 CareAssignment를 찾을 수 없습니다: " + careAssignmentId));
+        CareAssignment careAssignment = null;
 
-        // Calendar 객체와 CareAssignment 객체 연결
+        // careAssignmentId가 null이 아니면 CareAssignment 조회
+        if (careAssignmentId != null) {
+            careAssignment = careAssignmentRepository.findById(careAssignmentId)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 CareAssignment를 찾을 수 없습니다: " + careAssignmentId));
+        }
+
+        // CareAssignment가 null인 경우, careAssignment를 null로 설정
         calendar.setCareAssignment(careAssignment);
-        // isShared를 true로 설정
-        calendar.setIsShared(true);
 
         // 반복 일정 처리
         if (calendar.getRepeatCycle() != null) {

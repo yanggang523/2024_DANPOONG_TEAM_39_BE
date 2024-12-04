@@ -53,8 +53,8 @@ public class Calendar {
 
     // Many-to-One 관계 설정, 여러 Calendar가 하나의 CareAssignment에 연결될 수 있도록 합니다.
     // CareAssignment와의 단방향 관계
-    @ManyToOne
-    @JoinColumn(name = "care_assignment_id")
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "care_assignment_id", nullable = true)
     private CareAssignment careAssignment;
 
     @Column(name = "care_assignment_id", insertable = false, updatable = false)

@@ -4,6 +4,7 @@ import com.example._2024_danpoong_team_39_be.calendar.Calendar;
 import com.example._2024_danpoong_team_39_be.calendar.CalendarConverter;
 import com.example._2024_danpoong_team_39_be.calendar.CalendarDTO;
 import com.example._2024_danpoong_team_39_be.calendar.CalendarService;
+import com.example._2024_danpoong_team_39_be.careAssignment.CareAssignmentRepository;
 import com.example._2024_danpoong_team_39_be.domain.CareAssignment;
 import com.example._2024_danpoong_team_39_be.login.BaseResponse;
 import com.example._2024_danpoong_team_39_be.login.util.JwtUtil;
@@ -17,6 +18,10 @@ public class CalendarController {
     private final CalendarService calendarService;
     @Autowired
     private JwtUtil jwtUtil;
+    @Autowired
+    private CalendarRepository calendarRepository;
+    @Autowired
+    private CareAssignmentRepository careAssignmentRepository;
 
     public CalendarController(CalendarService calendarService) {
         this.calendarService = calendarService;
@@ -53,6 +58,26 @@ public class CalendarController {
 
         return BaseResponse.onSuccess(calendarDTOs);
     }
+    @GetMapping("/myCalendar")
+    public BaseResponse<List<Calendar>> getMyCalendar(@RequestHeader("Authorization") String token) {
+        try {
+            // 토큰에서 이메일 추출
+            String email = jwtUtil.getEmailFromToken(token);
+
+            // CareAssignment 조회
+            CareAssignment careAssignment = careAssignmentRepository.findCareAssignmentByEmail(email);
+
+            // CareAssignment에 연결된 일정 조회
+            List<Calendar> calendars = calendarService.getAllCalendarsForAssignment(careAssignment.getId());
+
+            // 성공 응답 반환
+            return new BaseResponse<>(true, calendars, "일정 조회에 성공했습니다.");
+        } catch (Exception e) {
+            // 에러 응답 반환
+            return new BaseResponse<>(false, null, "일정을 조회하는 도중 에러가 발생했습니다: " + e.getMessage());
+        }
+    }
+
 
 
     // 일정 수정 (부분 수정)

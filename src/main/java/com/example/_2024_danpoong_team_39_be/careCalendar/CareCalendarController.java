@@ -599,14 +599,14 @@ public class CareCalendarController {
     @PostMapping("/rest")
     public Calendar createRestCalendar(@RequestBody Calendar calendar) {
         Long careAssignmentId = calendar.getCareAssignmentId(); // careAssignmentId 추출
+        System.out.println("careAssignmentId: " + careAssignmentId);  // 로그 추가
 
-//        if (careAssignmentId == null) {
-//            throw new IllegalArgumentException("돌보미가 없어요");
-//        }
-
-        // CareAssignment 조회
-        CareAssignment careAssignment = careAssignmentRepository.findById(careAssignmentId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 돌보미를 찾을 수 없습니다: " + careAssignmentId));
+        // careAssignmentId가 null이면 findById 호출하지 않음
+        CareAssignment careAssignment = null;
+        if (careAssignmentId != null) {
+            careAssignment = careAssignmentRepository.findById(careAssignmentId)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 돌보미를 찾을 수 없습니다: " + careAssignmentId));
+        }
         if (calendar.getIsShared() == null) {
             calendar.setIsShared(true);  // true로 설정
         }
@@ -626,14 +626,14 @@ public class CareCalendarController {
     @PostMapping("/hospital")
     public Calendar createHospitalCalendar(@RequestBody Calendar calendar) {
         Long careAssignmentId = calendar.getCareAssignmentId(); // careAssignmentId 추출
+        System.out.println("careAssignmentId: " + careAssignmentId);  // 로그 추가
 
-//        if (careAssignmentId == null) {
-//            throw new IllegalArgumentException("돌보미가 없어요");
-//        }
-
-        // CareAssignment 조회
-        CareAssignment careAssignment = careAssignmentRepository.findById(careAssignmentId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 돌보미를 찾을 수 없습니다: " + careAssignmentId));
+        // careAssignmentId가 null이면 findById 호출하지 않음
+        CareAssignment careAssignment = null;
+        if (careAssignmentId != null) {
+            careAssignment = careAssignmentRepository.findById(careAssignmentId)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 돌보미를 찾을 수 없습니다: " + careAssignmentId));
+        }
         if (calendar.getIsShared() == null) {
             calendar.setIsShared(true);  // true로 설정
         }
@@ -649,17 +649,18 @@ public class CareCalendarController {
     @PostMapping("/meal")
     public Calendar createMealCalendar(@RequestBody Calendar calendar) {
         Long careAssignmentId = calendar.getCareAssignmentId(); // careAssignmentId 추출
+        System.out.println("careAssignmentId: " + careAssignmentId);  // 로그 추가
 
-//        if (careAssignmentId == null) {
-//            throw new IllegalArgumentException("돌보미가 없어요");
-//        }
+        // careAssignmentId가 null이면 findById 호출하지 않음
+        CareAssignment careAssignment = null;
+        if (careAssignmentId != null) {
+            careAssignment = careAssignmentRepository.findById(careAssignmentId)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 돌보미를 찾을 수 없습니다: " + careAssignmentId));
+        }
         if (calendar.getIsShared() == null) {
             calendar.setIsShared(true);  // true로 설정
         }
 
-        // CareAssignment 조회
-        CareAssignment careAssignment = careAssignmentRepository.findById(careAssignmentId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 돌보미를 찾을 수 없습니다: " + careAssignmentId));
         if (calendar.getCategory() == null || calendar.getCategory().isEmpty()) {
             calendar.setCategory("meal");
         }
@@ -672,17 +673,18 @@ public class CareCalendarController {
     @PostMapping("/others")
     public Calendar createOthersCalendar(@RequestBody Calendar calendar) {
         Long careAssignmentId = calendar.getCareAssignmentId(); // careAssignmentId 추출
+        System.out.println("careAssignmentId: " + careAssignmentId);  // 로그 추가
 
-//        if (careAssignmentId == null) {
-//            throw new IllegalArgumentException("돌보미가 없어요");
-//        }
+        // careAssignmentId가 null이면 findById 호출하지 않음
+        CareAssignment careAssignment = null;
+        if (careAssignmentId != null) {
+            careAssignment = careAssignmentRepository.findById(careAssignmentId)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 돌보미를 찾을 수 없습니다: " + careAssignmentId));
+        }
         if (calendar.getIsShared() == null) {
             calendar.setIsShared(true);  // true로 설정
         }
 
-        // CareAssignment 조회
-        CareAssignment careAssignment = careAssignmentRepository.findById(careAssignmentId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 돌보미를 찾을 수 없습니다: " + careAssignmentId));
         if (calendar.getCategory() == null || calendar.getCategory().isEmpty()) {
             calendar.setCategory("others");
         }
@@ -695,17 +697,18 @@ public class CareCalendarController {
     @PostMapping("/medication")
     public Calendar createMedicationCalendar(@RequestBody Calendar calendar) {
         Long careAssignmentId = calendar.getCareAssignmentId(); // careAssignmentId 추출
+        System.out.println("careAssignmentId: " + careAssignmentId);  // 로그 추가
 
-//        if (careAssignmentId == null) {
-//            throw new IllegalArgumentException("돌보미가 없어요");
-//        }
+        // careAssignmentId가 null이면 findById 호출하지 않음
+        CareAssignment careAssignment = null;
+        if (careAssignmentId != null) {
+            careAssignment = careAssignmentRepository.findById(careAssignmentId)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 돌보미를 찾을 수 없습니다: " + careAssignmentId));
+        }
         if (calendar.getIsShared() == null) {
             calendar.setIsShared(true);  // true로 설정
         }
 
-        // CareAssignment 조회
-        CareAssignment careAssignment = careAssignmentRepository.findById(careAssignmentId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 돌보미를 찾을 수 없습니다: " + careAssignmentId));
         if (calendar.getCategory() == null || calendar.getCategory().isEmpty()) {
             calendar.setCategory("medication");
         }
