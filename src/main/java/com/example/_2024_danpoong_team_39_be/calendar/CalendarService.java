@@ -72,7 +72,16 @@ public class CalendarService {
                 calendarRepository.save(repeatEvent);
             }
         } else {
-            // 단일 일정 저장
+            // 단일 일정 처리
+            if (calendar.getDate() == null) {
+                calendar.setDate(LocalDate.now()); // 기본 날짜 설정
+            }
+
+            if (Boolean.TRUE.equals(calendar.getIsShared())) {
+                calendar.setCareAssignment(careAssignment); // 여기에 CareAssignment 설정
+            }
+
+            // 저장
             calendarRepository.save(calendar);
         }
 
@@ -82,18 +91,23 @@ public class CalendarService {
     // 반복 주기에 따라 날짜 리스트 생성
     private List<LocalDate> generateRepeatDates(LocalDate startDate, Calendar.RepeatCycle repeatCycle) {
         List<LocalDate> repeatDates = new ArrayList<>();
+        // 반복 횟수를 적절히 설정 (예: 최대 12번)
+        int repeatCount = 12; // 예시로 12번 반복
+
         switch (repeatCycle) {
             case WEEKLY:
-                for (int i = 1; i <= 7; i++) {
-                    repeatDates.add(startDate.plusDays(i - 1));
+                for (int i = 0; i < repeatCount; i++) {
+                    repeatDates.add(startDate.plusWeeks(i)); // 매주 반복
                 }
                 break;
             case DAILY:
-                repeatDates.add(startDate);
+                for (int i = 0; i < repeatCount; i++) {
+                    repeatDates.add(startDate.plusDays(i)); // 매일 반복
+                }
                 break;
             case MONTHLY:
-                for (int i = 0; i < 30; i++) {
-                    repeatDates.add(startDate.plusDays(i));
+                for (int i = 0; i < repeatCount; i++) {
+                    repeatDates.add(startDate.plusMonths(i)); // 매달 반복
                 }
                 break;
             default:
@@ -101,6 +115,7 @@ public class CalendarService {
         }
         return repeatDates;
     }
+
 
 
     @Transactional
