@@ -5,18 +5,19 @@ package com.example._2024_danpoong_team_39_be.login.controller;
 import com.example._2024_danpoong_team_39_be.domain.CareRecipient;
 import com.example._2024_danpoong_team_39_be.login.converter.CareRecipientConverter;
 import com.example._2024_danpoong_team_39_be.login.converter.MemberConverter;
-import com.example._2024_danpoong_team_39_be.login.dto.CareRecipientDTO;
-import com.example._2024_danpoong_team_39_be.login.dto.FillupResultDTO;
-import com.example._2024_danpoong_team_39_be.login.dto.MemberResponseDTO;
+import com.example._2024_danpoong_team_39_be.login.dto.*;
+import com.example._2024_danpoong_team_39_be.login.repository.MemberRepository;
 import com.example._2024_danpoong_team_39_be.login.service.AuthService;
 import com.example._2024_danpoong_team_39_be.login.BaseResponse;
 import com.example._2024_danpoong_team_39_be.domain.Member;
-import com.example._2024_danpoong_team_39_be.login.dto.MemberRequestDTO;
 import com.example._2024_danpoong_team_39_be.login.service.CareRecipentService;
 import com.example._2024_danpoong_team_39_be.login.util.JwtUtil;
+import com.example._2024_danpoong_team_39_be.login.util.KakaoUtil;
+import com.nimbusds.oauth2.sdk.TokenResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +29,8 @@ public class AuthController {
 
     private final AuthService authService;
     private final JwtUtil jwtUtil;
+    private final KakaoUtil kakaoUtil;
+    private final MemberRepository memberRepository;
 
 
     // 멤버 추가 정보 입력
@@ -41,13 +44,15 @@ public class AuthController {
     }
 
 
-    // 카카오 로그인 (토큰 요청 후 로그인)
-    @GetMapping("/api/auth/kakao")
-    public ResponseEntity<Void> kakaoLogin(@RequestParam("code") String accessCode, HttpServletResponse httpServletResponse) {
-        log.info("Received accessCode: {}", accessCode);
-        authService.oAuthLogin(accessCode, httpServletResponse);
-        return ResponseEntity.ok().build();
+  @GetMapping("/api/member/signup")
+    public BaseResponse<MemberResponseDTO.JoinResultDTO> kakaoLogin(@RequestParam("code") String accessCode, HttpServletResponse httpServletResponse) {
+        Member member = authService.oAuthLogin(accessCode, httpServletResponse);
+        return BaseResponse.onSuccess(MemberConverter.toJoinResultDTO(member));
     }
+
+
+
+
 
     @PostMapping("/api/member/info")
     public BaseResponse<MemberResponseDTO.JoinResultDTO> fillupInfo(@RequestHeader("Authorization") String token){

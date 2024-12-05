@@ -34,30 +34,31 @@ public class CalendarController {
         return calendarDTO;
     }
 //    캘린더 저장
-    @PostMapping
-    public BaseResponse<CalendarDTO> createCalendar(@RequestHeader("Authorization") String token,
-                                                    @RequestBody CalendarDTO calendarDTO) {
-        // Calendar 객체를 생성하는 서비스 호출
-        Calendar calendar = calendarService.createCalendar(token, calendarDTO);
-        if (calendar.getIsShared() == null) {
-            calendar.setIsShared(false);  // true로 설정
-        }
-
-        // 생성된 Calendar 객체를 CalendarDTO로 변환하여 반환
-        return BaseResponse.onSuccess(CalendarConverter.toCalendarDTO(calendar));
+@PostMapping
+public BaseResponse<CalendarDTO> createCalendar(@RequestHeader("Authorization") String token,
+                                                @RequestBody CalendarDTO calendarDTO) {
+    // category가 null일 경우 "myCalendar"로 설정
+    if (calendarDTO.getCategory() == null) {
+        calendarDTO.setCategory("myCalendar");
     }
 
-//돌보미 1명의 전체 캘린더 조회
+    // Calendar 객체를 생성하는 서비스 호출
+    Calendar calendar = calendarService.createCalendar(token, calendarDTO);
+
+    // 생성된 Calendar 객체를 CalendarDTO로 변환하여 반환
+    return BaseResponse.onSuccess(CalendarConverter.toCalendarDTO(calendar));
+}
+
+    //돌보미 1명의 전체 캘린더 조회
     @GetMapping("/{careAssignmentId}")
-    public BaseResponse<List<CalendarDTO>> getAllCalendarsForAssignment(@PathVariable Long careAssignmentId) {
+    public BaseResponse<List<Calendar>> getAllCalendarsForAssignment(@PathVariable Long careAssignmentId) {
         // CareAssignment에 속한 모든 일정 조회
         List<Calendar> calendars = calendarService.getAllCalendarsForAssignment(careAssignmentId);
 
-        // DTO로 변환하여 반환
-        List<CalendarDTO> calendarDTOs = CalendarConverter.toCalendarDTOList(calendars);
-
-        return BaseResponse.onSuccess(calendarDTOs);
+        // BaseResponse로 반환
+        return BaseResponse.onSuccess(calendars);
     }
+
     @GetMapping("/myCalendar")
     public BaseResponse<List<Calendar>> getMyCalendar(@RequestHeader("Authorization") String token) {
         try {
