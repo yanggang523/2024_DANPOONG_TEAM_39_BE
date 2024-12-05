@@ -3,10 +3,11 @@ package com.example._2024_danpoong_team_39_be.domain;
 import com.example._2024_danpoong_team_39_be.calendar.Calendar;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import lombok.*;
 import net.minidev.json.annotate.JsonIgnore;
-
+import com.fasterxml.jackson.annotation.JsonView;
 @Getter
 @Setter
 @Entity
@@ -24,6 +25,14 @@ public class CareAssignment {
 
     @Column(nullable = false, length = 50)
     private String email;
+    // Create a View class for conditional serialization
+    public static class Views {
+        public static class Public {}
+        public static class Admin extends Public {}
+    }
+
+    @JsonView(Views.Public.class)
+    private boolean available = true;  // 기본값을 true로 설정
 
     @JsonIgnore  // 이 필드는 직렬화 시 무시됩니다.
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})

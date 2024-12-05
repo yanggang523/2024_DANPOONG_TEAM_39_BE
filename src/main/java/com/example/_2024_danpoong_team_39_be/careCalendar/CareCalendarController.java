@@ -20,10 +20,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/careCalendar")
@@ -62,67 +60,70 @@ public class CareCalendarController {
         // DB에서 모든 CareAssignment 가져오기
         return careAssignmentRepository.findAll();
     }
-    // 공백 일정에 일정이 없는 돌보미 목록을 반환
+
     @GetMapping("/rest/caregiver")
     public Map<String, Object> getRestCalendarForm(
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam("startTime") @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime startTime,
             @RequestParam("endTime") @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime endTime) {
 
+        // 일정 카테고리 설정 (휴식 일정 카테고리 설정)
         Calendar calendar = new Calendar();
-
-        // 특정 날짜와 시간대에 일정이 있는 CareAssignment ID 가져오기
-        List<Long> busyCaregiverIds = calendarRepository.findByDate(date).stream()
-                .filter(cal -> !(cal.getEndTime().isBefore(startTime) || cal.getStartTime().isAfter(endTime))) // 일정 겹침 확인
-                .map(cal -> cal.getCareAssignment().getId())
-                .distinct()
-                .toList();
-
-        // 모든 CareAssignment 중에서 일정이 없는 돌보미 필터링
-        List<CareAssignment> availableAssignments = careAssignmentRepository.findAll().stream()
-                .filter(assignment -> !busyCaregiverIds.contains(assignment.getId()))
-                .toList();
-
-        calendar.setCareAssignments(availableAssignments); // 필터링된 돌보미 리스트 설정
-
-        // RestType의 모든 값을 반환
-        List<String> restTypes = new ArrayList<>();
-        for (RestType type : RestType.values()) {
-            restTypes.add(type.name()); // RestType enum 값들을 리스트로 저장
-        }
-
-        // category는 "rest"로 고정
         calendar.setCategory("rest");
 
-        // 응답으로 반환할 데이터 준비
+        // 해당 날짜의 모든 일정 조회 (돌보미가 있는/없는 일정 포함)
+        List<Calendar> allCalendars = calendarRepository.findByDate(date);
+
+        // 모든 CareAssignment 목록 조회 (모든 돌보미 목록)
+        List<CareAssignment> allCareAssignments = careAssignmentRepository.findAll();
+
+        // 해당 날짜와 시간에 이미 일정이 있는 돌보미 ID를 구하기
+        Set<Long> busyCaregiverIds = allCalendars.stream()
+                .filter(cal -> cal.getCareAssignment() != null && isScheduleConflict(cal.getStartTime(), cal.getEndTime(), startTime, endTime)) // 일정이 겹치는 경우만
+                .map(cal -> cal.getCareAssignment().getId()) // 해당 돌보미의 ID를 추출
+                .collect(Collectors.toSet()); // 중복 제거
+
+        // 모든 CareAssignment 중에서 일정이 겹치지 않는 돌보미만 available = true로 설정
+        List<CareAssignment> availableAssignments = allCareAssignments.stream()
+                .map(assignment -> {
+                    // 일정이 겹치는 돌보미는 available = false, 아니면 true
+                    boolean isAvailable = !busyCaregiverIds.contains(assignment.getId());
+                    assignment.setAvailable(isAvailable);
+                    return assignment;
+                })
+                .collect(Collectors.toList());
+
+        // 'calendar' 객체에 설정된 값을 그대로 사용
+        calendar.setCareAssignments(availableAssignments);  // 해당 시간대에 가능한 돌보미 목록 설정
+
+        // 응답 객체 준비
         Map<String, Object> response = new HashMap<>();
-
-        // careAssignments 내부에 돌보미 정보 포함
-        List<Map<String, Object>> careAssignmentsWithDetails = new ArrayList<>();
-        for (CareAssignment assignment : availableAssignments) {
-            Map<String, Object> assignmentDetails = new HashMap<>();
-            assignmentDetails.put("id", assignment.getId());
-
-            // 돌보미 정보
-            Map<String, Object> memberDetails = new HashMap<>();
-            memberDetails.put("id", assignment.getMember().getId());
-            memberDetails.put("alias", assignment.getMember().getAlias());
-            memberDetails.put("email", assignment.getMember().getEmail());
-
-            assignmentDetails.put("member", memberDetails);
-            assignmentDetails.put("relationship", assignment.getRelationship());
-            assignmentDetails.put("calendar", assignment.getCalendar()); // 필요에 따라 설정
-
-            careAssignmentsWithDetails.add(assignmentDetails);
-        }
-
-        // 최종 응답 객체에 추가
-        response.put("calendar", calendar);
-        response.put("careAssignments", careAssignmentsWithDetails); // 필터링된 CareAssignment 리스트
-        response.put("restType", restTypes); // RestType 리스트 추가
+        response.put("calendar", calendar);  // calendar 객체를 그대로 반환
+        response.put("restType", getRestTypes());  // restType 반환 (미리 설정된 리스트)
 
         return response;
     }
+
+    // 일정 충돌 여부 확인
+    // 일정 충돌 여부 확인
+    private boolean isScheduleConflict(LocalTime scheduleStartTime, LocalTime scheduleEndTime, LocalTime requestStartTime, LocalTime requestEndTime) {
+        // 기존 일정이 요청 시작 시간과 겹치지 않거나, 기존 일정 끝 시간이 요청 종료 시간과 겹치지 않으면 충돌하지 않음
+        return !(scheduleEndTime.equals(requestStartTime) || scheduleStartTime.equals(requestEndTime) || scheduleEndTime.isBefore(requestStartTime) || scheduleStartTime.isAfter(requestEndTime));
+    }
+
+
+    // restType 값을 반환하는 메서드
+    private List<String> getRestTypes() {
+        List<String> restTypes = new ArrayList<>();
+        for (RestType type : RestType.values()) {
+            restTypes.add(type.name());
+        }
+        return restTypes;
+    }
+
+
+
+
 
     //돌봄일정 작성 폼(rest)
     @GetMapping("/rest")
@@ -131,7 +132,12 @@ public class CareCalendarController {
         // DB에서 모든 CareAssignment 가져오기
         List<CareAssignment> allAssignments = careAssignmentRepository.findAll();
         calendar.setCareAssignments(allAssignments);  // 리스트 설정
-
+        // 'available' 값이 false인 경우 강제로 true로 설정
+        for (CareAssignment assignment : allAssignments) {
+            if (!assignment.isAvailable()) { // available 값이 false인 경우
+                assignment.setAvailable(true); // true로 강제 설정
+            }
+        }
         // RestType의 모든 값을 반환
         List<String> restTypes = new ArrayList<>();
         for (RestType type : RestType.values()) {

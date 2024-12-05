@@ -28,4 +28,5 @@ public interface CareAssignmentRepository extends JpaRepository<CareAssignment, 
     List<CareAssignment> findByCalendarIsNull();
 
     CareAssignment findCareAssignmentByEmail(String email);
+
 }

@@ -217,6 +217,8 @@ public class CareCalendarService {
         List<Long> busyCaregiverIds = calendarRepository.findByDate(date).stream()
                 .filter(calendar -> calendar.getCareAssignment() != null) // CareAssignment가 null이 아닌지 확인
                 .filter(calendar -> !(calendar.getEndTime().isBefore(startTime) || calendar.getStartTime().isAfter(endTime)))
+                // 겹치는 시간대라도 끝나는 시간과 시작 시간이 정확히 맞아떨어지면 비는 시간으로 간주
+                .filter(calendar -> !(calendar.getEndTime().equals(startTime) || calendar.getStartTime().equals(endTime)))
                 .map(calendar -> calendar.getCareAssignment().getId())
                 .distinct()
                 .toList();
@@ -233,9 +235,6 @@ public class CareCalendarService {
             return "돌보미가 없습니다";
         }
     }
-
-
-
 
 
 }
