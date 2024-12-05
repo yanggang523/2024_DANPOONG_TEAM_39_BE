@@ -52,6 +52,18 @@ public class AuthService {
 
     }
 
+//    KakaoDTO.OAuthToken oAuthToken = kakaoUtil.requestToken(accessCode);
+//    KakaoDTO.KakaoProfile kakaoProfile = kakaoUtil.requestProfile(oAuthToken);
+//    String email = kakaoProfile.getKakao_account().getEmail();
+//
+//    User user = userRepository.findByEmail(email)
+//            .orElseGet(() -> createNewUser(kakaoProfile));
+//
+//    String token = jwtUtil.createAccessToken(user.getEmail(), user.getRole().toString());
+//        httpServletResponse.setHeader("Authorization", token);
+//
+//        return user;
+
     public Member memberInfo(String token) {
        // 1. 토큰에서 이메일 추출
         String email = jwtUtil.getEmailFromToken(token);
