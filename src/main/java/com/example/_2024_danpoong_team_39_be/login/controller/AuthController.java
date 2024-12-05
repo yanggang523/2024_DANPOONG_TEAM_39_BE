@@ -42,8 +42,9 @@ public class AuthController {
 
 
     // 카카오 로그인 (토큰 요청 후 로그인)
-    @GetMapping("/api/member/signup")
+    @GetMapping("/api/auth/kakao")
     public ResponseEntity<Void> kakaoLogin(@RequestParam("code") String accessCode, HttpServletResponse httpServletResponse) {
+        log.info("Received accessCode: {}", accessCode);
         authService.oAuthLogin(accessCode, httpServletResponse);
         return ResponseEntity.ok().build();
     }
