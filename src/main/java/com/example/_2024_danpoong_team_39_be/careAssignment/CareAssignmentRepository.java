@@ -22,11 +22,6 @@ public interface CareAssignmentRepository extends JpaRepository<CareAssignment, 
 
     Optional<CareAssignment> findByEmail(String email);
 
-
-    List<CareAssignment> findByCalendarIsSharedFalseAndCalendarCareAssignmentIdNotNull();
-
-    List<CareAssignment> findByCalendarIsNull();
-
     CareAssignment findCareAssignmentByEmail(String email);
 
 }

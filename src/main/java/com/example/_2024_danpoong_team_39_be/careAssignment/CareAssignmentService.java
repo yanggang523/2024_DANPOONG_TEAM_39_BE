@@ -13,4 +13,5 @@ public class CareAssignmentService {
     public List<CareAssignment> getAllCareAssignments() {
         return careAssignmentRepository.findAll();  // DB에서 모든 CareAssignment 객체를 가져옴
     }
+
 }

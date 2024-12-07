@@ -4,6 +4,11 @@ package com.example._2024_danpoong_team_39_be.careCalendar;
 import com.example._2024_danpoong_team_39_be.calendar.Calendar;
 import com.example._2024_danpoong_team_39_be.calendar.CalendarRepository;
 import com.example._2024_danpoong_team_39_be.careAssignment.CareAssignmentRepository;
+import com.example._2024_danpoong_team_39_be.careCalendar.hospital.TransportationTpye;
+import com.example._2024_danpoong_team_39_be.careCalendar.meal.MealType;
+import com.example._2024_danpoong_team_39_be.careCalendar.medication.Medication;
+import com.example._2024_danpoong_team_39_be.careCalendar.others.Others;
+import com.example._2024_danpoong_team_39_be.careCalendar.rest.RestType;
 import com.example._2024_danpoong_team_39_be.domain.CareAssignment;
 import com.example._2024_danpoong_team_39_be.domain.CareRecipient;
 
@@ -28,10 +33,6 @@ public class CareCalendarService {
     // isShared가 true인 모든 일정 조회
     public List<Calendar> getAllSharedCalendars() {
         return calendarRepository.findByIsSharedTrue();  // isShared가 true인 모든 일정 조회
-    }
-
-    public List<CareAssignment> getCareAssignments() {
-        return careAssignmentRepository.findAll(); // careAssignmentRepository는 실제 데이터베이스에서 데이터를 가져오는 역할을 합니다.
     }
 
     @Transactional
@@ -236,5 +237,408 @@ public class CareCalendarService {
         }
     }
 
+    public Map<String, Object> getRestCalendar(LocalDate date, LocalTime startTime, LocalTime endTime) {
+        // 휴식 카테고리 일정 생성
+        Calendar calendar = new Calendar();
+        calendar.setCategory("rest");
+
+        // 해당 날짜의 모든 일정 조회
+        List<Calendar> allCalendars = calendarRepository.findByDate(date);
+
+        // 해당 날짜와 시간에 이미 일정이 있는 돌보미 ID 찾기
+        Set<Long> busyCaregiverIds = findBusyCaregiverIds(allCalendars, startTime, endTime);
+
+        // 가능한 돌보미 목록 업데이트
+        List<CareAssignment> availableAssignments = updateCaregiverAvailability(busyCaregiverIds);
+
+        // Calendar 객체에 가능한 돌보미 설정
+        calendar.setCareAssignments(availableAssignments);
+
+        // 응답 객체 생성
+        Map<String, Object> response = new HashMap<>();
+        response.put("calendar", calendar);  // Calendar 객체
+        response.put("restType", getRestTypes());  // RestType 목록 반환
+        return response;
+    }
+    public Map<String, Object> getMedicaionCalendar(LocalDate date, LocalTime startTime, LocalTime endTime) {
+        // 휴식 카테고리 일정 생성
+        Calendar calendar = new Calendar();
+        calendar.setCategory("medication");
+
+        // 해당 날짜의 모든 일정 조회
+        List<Calendar> allCalendars = calendarRepository.findByDate(date);
+
+        // 해당 날짜와 시간에 이미 일정이 있는 돌보미 ID 찾기
+        Set<Long> busyCaregiverIds = findBusyCaregiverIds(allCalendars, startTime, endTime);
+
+        // 가능한 돌보미 목록 업데이트
+        List<CareAssignment> availableAssignments = updateCaregiverAvailability(busyCaregiverIds);
+
+        // Calendar 객체에 가능한 돌보미 설정
+        calendar.setCareAssignments(availableAssignments);
+        List<String> medicationTypeList = new ArrayList<>();
+        for (Medication medication : calendar.getMedications()) {
+            medicationTypeList.add(medication.getMedicationType()); // Others 엔티티에서 'othersType' 값을 리스트에 추가
+        }
+
+        // 응답 객체 생성
+        Map<String, Object> response = new HashMap<>();
+        response.put("calendar", calendar);
+        response.put("medicationType", medicationTypeList);
+        return response;
+    }
+    public Map<String, Object> getOthersCalendar(LocalDate date, LocalTime startTime, LocalTime endTime) {
+        // 휴식 카테고리 일정 생성
+        Calendar calendar = new Calendar();
+        calendar.setCategory("others");
+
+        // 해당 날짜의 모든 일정 조회
+        List<Calendar> allCalendars = calendarRepository.findByDate(date);
+
+        // 해당 날짜와 시간에 이미 일정이 있는 돌보미 ID 찾기
+        Set<Long> busyCaregiverIds = findBusyCaregiverIds(allCalendars, startTime, endTime);
+
+        // 가능한 돌보미 목록 업데이트
+        List<CareAssignment> availableAssignments = updateCaregiverAvailability(busyCaregiverIds);
+        calendar.setCareAssignments(availableAssignments);
+        // Calendar 객체에 가능한 돌보미 설정
+        // othersType 데이터를 가져와서 응답에 추가
+        List<String> othersTypeList = new ArrayList<>();
+        for (Others other : calendar.getOthers()) {
+            othersTypeList.add(other.getOthersType()); // Others 엔티티에서 'othersType' 값을 리스트에 추가
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("calendar", calendar);
+        response.put("othersType", othersTypeList);  // othersType 리스트를 'others'로 반환
+        return response;
+    }
+    public Map<String, Object> getHospiatalCalendar(LocalDate date, LocalTime startTime, LocalTime endTime) {
+        // 휴식 카테고리 일정 생성
+        Calendar calendar = new Calendar();
+        calendar.setCategory("hospital");
+
+        // 해당 날짜의 모든 일정 조회
+        List<Calendar> allCalendars = calendarRepository.findByDate(date);
+
+        // 해당 날짜와 시간에 이미 일정이 있는 돌보미 ID 찾기
+        Set<Long> busyCaregiverIds = findBusyCaregiverIds(allCalendars, startTime, endTime);
+
+        // 가능한 돌보미 목록 업데이트
+        List<CareAssignment> availableAssignments = updateCaregiverAvailability(busyCaregiverIds);
+        calendar.setCareAssignments(availableAssignments);
+        // TransportationTpye의 모든 값을 반환
+        List<String> transportationTypes = new ArrayList<>();
+        for (TransportationTpye type : TransportationTpye.values()) {
+            transportationTypes.add(type.name()); // TransportationTpye enum 값들을 리스트로 저장
+        }
+        Map<String, Object> response = new HashMap<>();
+        response.put("calendar", calendar);
+        response.put("transportationType", transportationTypes);  // TransportationTpye 리스트 추가
+        return response;
+    }
+    public Map<String, Object> getMealCalendar(LocalDate date, LocalTime startTime, LocalTime endTime) {
+        // 휴식 카테고리 일정 생성
+        Calendar calendar = new Calendar();
+        calendar.setCategory("meal");
+
+        // 해당 날짜의 모든 일정 조회
+        List<Calendar> allCalendars = calendarRepository.findByDate(date);
+
+        // 해당 날짜와 시간에 이미 일정이 있는 돌보미 ID 찾기
+        Set<Long> busyCaregiverIds = findBusyCaregiverIds(allCalendars, startTime, endTime);
+
+        // 가능한 돌보미 목록 업데이트
+        List<CareAssignment> availableAssignments = updateCaregiverAvailability(busyCaregiverIds);
+        calendar.setCareAssignments(availableAssignments);
+        // MealType의 모든 값을 반환
+        List<String> mealTypes = new ArrayList<>();
+        for (MealType type : MealType.values()) {
+            mealTypes.add(type.name()); // MealType enum 값들을 리스트로 저장
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("calendar", calendar);
+        response.put("mealType", mealTypes);  // MealType 리스트 추가
+        return response;
+    }
+
+
+    // 일정이 겹치는 돌보미 ID를 찾는 메서드
+    private Set<Long> findBusyCaregiverIds(List<Calendar> allCalendars, LocalTime startTime, LocalTime endTime) {
+        return allCalendars.stream()
+                .filter(cal -> cal.getCareAssignment() != null &&
+                        isScheduleConflict(cal.getStartTime(), cal.getEndTime(), startTime, endTime))
+                .map(cal -> cal.getCareAssignment().getId())
+                .collect(Collectors.toSet());
+    }
+
+    // 돌보미의 available 상태를 업데이트하는 메서드
+    private List<CareAssignment> updateCaregiverAvailability(Set<Long> busyCaregiverIds) {
+        return careAssignmentRepository.findAll().stream()
+                .map(assignment -> {
+                    boolean isAvailable = !busyCaregiverIds.contains(assignment.getId());
+                    assignment.setAvailable(isAvailable);
+                    return assignment;
+                })
+                .collect(Collectors.toList());
+    }
+
+    // 일정 충돌 여부 확인 메서드
+    private boolean isScheduleConflict(LocalTime scheduleStartTime, LocalTime scheduleEndTime, LocalTime requestStartTime, LocalTime requestEndTime) {
+        return !(scheduleEndTime.equals(requestStartTime) ||
+                scheduleStartTime.equals(requestEndTime) ||
+                scheduleEndTime.isBefore(requestStartTime) ||
+                scheduleStartTime.isAfter(requestEndTime));
+    }
+
+    // RestType 목록 반환 메서드
+    private List<String> getRestTypes() {
+        return Arrays.stream(RestType.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
+    }
+    public Map<String, Object> prepareRestCalendar() {
+        // Calendar 객체 생성
+        Calendar calendar = new Calendar();
+
+        // DB에서 모든 CareAssignment 가져오기
+        List<CareAssignment> allAssignments = careAssignmentRepository.findAll();
+        calendar.setCareAssignments(allAssignments); // 리스트 설정
+
+        // 'available' 값이 false인 경우 강제로 true로 설정
+        for (CareAssignment assignment : allAssignments) {
+            if (!assignment.isAvailable()) { // available 값이 false인 경우
+                assignment.setAvailable(true); // true로 강제 설정
+            }
+        }
+
+        // RestType의 모든 값을 리스트로 저장
+        List<String> restTypes = new ArrayList<>();
+        for (RestType type : RestType.values()) {
+            restTypes.add(type.name());
+        }
+
+        // category는 "rest"로 고정
+        calendar.setCategory("rest");
+
+        // careAssignments 내부에 돌보미 정보 포함
+        List<Map<String, Object>> careAssignmentsWithDetails = new ArrayList<>();
+        for (CareAssignment assignment : allAssignments) {
+            Map<String, Object> assignmentDetails = new HashMap<>();
+            assignmentDetails.put("id", assignment.getId());
+
+            // 돌보미 정보
+            Map<String, Object> memberDetails = new HashMap<>();
+            memberDetails.put("id", assignment.getMember().getId());
+            memberDetails.put("alias", assignment.getMember().getAlias());
+            memberDetails.put("email", assignment.getMember().getEmail());
+
+            assignmentDetails.put("member", memberDetails);
+            assignmentDetails.put("relationship", assignment.getRelationship());
+            assignmentDetails.put("calendar", assignment.getCalendar()); // 필요에 따라 설정
+
+            careAssignmentsWithDetails.add(assignmentDetails);
+        }
+
+        // 최종 응답 객체 준비
+        Map<String, Object> response = new HashMap<>();
+        response.put("calendar", calendar);
+        response.put("restType", restTypes); // RestType 리스트 추가
+
+        return response;
+    }
+    public Map<String, Object> prepareMedicationCalendar() {
+        // Calendar 객체 생성
+        Calendar calendar = new Calendar();
+
+        // DB에서 모든 CareAssignment 가져오기
+        List<CareAssignment> allAssignments = careAssignmentRepository.findAll();
+        calendar.setCareAssignments(allAssignments); // 리스트 설정
+
+        // 'available' 값이 false인 경우 강제로 true로 설정
+        for (CareAssignment assignment : allAssignments) {
+            if (!assignment.isAvailable()) { // available 값이 false인 경우
+                assignment.setAvailable(true); // true로 강제 설정
+            }
+        }
+
+        List<String> medicationTypeList = new ArrayList<>();
+        for (Medication medication : calendar.getMedications()) {
+            medicationTypeList.add(medication.getMedicationType()); // Others 엔티티에서 'othersType' 값을 리스트에 추가
+        }
+
+        // category는 "rest"로 고정
+        calendar.setCategory("medication");
+        // 응답으로 반환할 데이터 준비
+        Map<String, Object> response = new HashMap<>();
+        // careAssignments 내부에 돌보미 정보 포함
+        List<Map<String, Object>> careAssignmentsWithDetails = new ArrayList<>();
+        for (CareAssignment assignment : allAssignments) {
+            Map<String, Object> assignmentDetails = new HashMap<>();
+            assignmentDetails.put("id", assignment.getId());
+
+            // 돌보미 정보
+            Map<String, Object> memberDetails = new HashMap<>();
+            memberDetails.put("id", assignment.getMember().getId());
+            memberDetails.put("alias", assignment.getMember().getAlias());
+            memberDetails.put("email", assignment.getMember().getEmail());
+
+            assignmentDetails.put("member", memberDetails);
+            assignmentDetails.put("relationship", assignment.getRelationship());
+            assignmentDetails.put("calendar", assignment.getCalendar()); // 필요에 따라 설정
+
+            careAssignmentsWithDetails.add(assignmentDetails);
+        }
+
+        // 최종 응답 객체 준비
+        // 최종 응답 객체에 추가
+        response.put("calendar", calendar);
+        response.put("medicationType", medicationTypeList);  // othersType 리스트를 'others'로 반환
+
+        return response;
+    }
+    public Map<String, Object> prepareOtherCalendar() {
+        // Calendar 객체 생성
+        Calendar calendar = new Calendar();
+
+        // DB에서 모든 CareAssignment 가져오기
+        List<CareAssignment> allAssignments = careAssignmentRepository.findAll();
+        calendar.setCareAssignments(allAssignments); // 리스트 설정
+
+        // 'available' 값이 false인 경우 강제로 true로 설정
+        for (CareAssignment assignment : allAssignments) {
+            if (!assignment.isAvailable()) { // available 값이 false인 경우
+                assignment.setAvailable(true); // true로 강제 설정
+            }
+        }
+
+        // category는 "rest"로 고정
+        calendar.setCategory("others");
+        // 응답으로 반환할 데이터 준비
+        Map<String, Object> response = new HashMap<>();
+        // careAssignments 내부에 돌보미 정보 포함
+        List<Map<String, Object>> careAssignmentsWithDetails = new ArrayList<>();
+        for (CareAssignment assignment : allAssignments) {
+            Map<String, Object> assignmentDetails = new HashMap<>();
+            assignmentDetails.put("id", assignment.getId());
+
+            // 돌보미 정보
+            Map<String, Object> memberDetails = new HashMap<>();
+            memberDetails.put("id", assignment.getMember().getId());
+            memberDetails.put("alias", assignment.getMember().getAlias());
+            memberDetails.put("email", assignment.getMember().getEmail());
+
+            assignmentDetails.put("member", memberDetails);
+            assignmentDetails.put("relationship", assignment.getRelationship());
+            assignmentDetails.put("calendar", assignment.getCalendar()); // 필요에 따라 설정
+
+            careAssignmentsWithDetails.add(assignmentDetails);
+        }
+        // othersType 데이터를 가져와서 응답에 추가
+        List<String> othersTypeList = new ArrayList<>();
+        for (Others other : calendar.getOthers()) {
+            othersTypeList.add(other.getOthersType()); // Others 엔티티에서 'othersType' 값을 리스트에 추가
+        }
+
+        // 최종 응답 객체에 추가
+        response.put("calendar", calendar);
+        response.put("othersType", othersTypeList);  // othersType 리스트를 'others'로 반환
+        return response;
+    }
+    public Map<String, Object> prepareMealCalendar() {
+        // Calendar 객체 생성
+        Calendar calendar = new Calendar();
+
+        // DB에서 모든 CareAssignment 가져오기
+        List<CareAssignment> allAssignments = careAssignmentRepository.findAll();
+        calendar.setCareAssignments(allAssignments); // 리스트 설정
+
+        // 'available' 값이 false인 경우 강제로 true로 설정
+        for (CareAssignment assignment : allAssignments) {
+            if (!assignment.isAvailable()) { // available 값이 false인 경우
+                assignment.setAvailable(true); // true로 강제 설정
+            }
+        }
+
+        // category는 "rest"로 고정
+        calendar.setCategory("meal");
+        // 응답으로 반환할 데이터 준비
+        Map<String, Object> response = new HashMap<>();
+        // careAssignments 내부에 돌보미 정보 포함
+        List<Map<String, Object>> careAssignmentsWithDetails = new ArrayList<>();
+        for (CareAssignment assignment : allAssignments) {
+            Map<String, Object> assignmentDetails = new HashMap<>();
+            assignmentDetails.put("id", assignment.getId());
+
+            // 돌보미 정보
+            Map<String, Object> memberDetails = new HashMap<>();
+            memberDetails.put("id", assignment.getMember().getId());
+            memberDetails.put("alias", assignment.getMember().getAlias());
+            memberDetails.put("email", assignment.getMember().getEmail());
+
+            assignmentDetails.put("member", memberDetails);
+            assignmentDetails.put("relationship", assignment.getRelationship());
+            assignmentDetails.put("calendar", assignment.getCalendar()); // 필요에 따라 설정
+
+            careAssignmentsWithDetails.add(assignmentDetails);
+        }
+
+        // 최종 응답 객체에 추가
+        List<String> mealTypes = new ArrayList<>();
+        for (MealType type : MealType.values()) {
+            mealTypes.add(type.name());  // RestType enum 값들을 리스트로 저장
+        }
+        // 최종 응답 객체에 추가
+        response.put("calendar", calendar);
+        response.put("mealType", mealTypes);  // othersType 리스트를 'others'로 반환
+        return response;
+    }
+    public Map<String, Object> prepareHospitalCalendar() {
+        // Calendar 객체 생성
+        Calendar calendar = new Calendar();
+
+        // DB에서 모든 CareAssignment 가져오기
+        List<CareAssignment> allAssignments = careAssignmentRepository.findAll();
+        calendar.setCareAssignments(allAssignments); // 리스트 설정
+
+        // 'available' 값이 false인 경우 강제로 true로 설정
+        for (CareAssignment assignment : allAssignments) {
+            if (!assignment.isAvailable()) { // available 값이 false인 경우
+                assignment.setAvailable(true); // true로 강제 설정
+            }
+        }
+
+        // category는 "rest"로 고정
+        calendar.setCategory("rest");
+        // 응답으로 반환할 데이터 준비
+        Map<String, Object> response = new HashMap<>();
+        // careAssignments 내부에 돌보미 정보 포함
+        List<Map<String, Object>> careAssignmentsWithDetails = new ArrayList<>();
+        for (CareAssignment assignment : allAssignments) {
+            Map<String, Object> assignmentDetails = new HashMap<>();
+            assignmentDetails.put("id", assignment.getId());
+
+            // 돌보미 정보
+            Map<String, Object> memberDetails = new HashMap<>();
+            memberDetails.put("id", assignment.getMember().getId());
+            memberDetails.put("alias", assignment.getMember().getAlias());
+            memberDetails.put("email", assignment.getMember().getEmail());
+
+            assignmentDetails.put("member", memberDetails);
+            assignmentDetails.put("relationship", assignment.getRelationship());
+            assignmentDetails.put("calendar", assignment.getCalendar()); // 필요에 따라 설정
+
+            careAssignmentsWithDetails.add(assignmentDetails);
+        }
+        List<String> transportationTypes = new ArrayList<>();
+        for (TransportationTpye type : TransportationTpye.values()) {
+            transportationTypes.add(type.name());  // RestType enum 값들을 리스트로 저장
+        }
+        // 최종 응답 객체에 추가
+        response.put("calendar", calendar);
+        response.put("transportationType", transportationTypes);  // RestType 리스트 추가
+        return response;
+    }
 
 }

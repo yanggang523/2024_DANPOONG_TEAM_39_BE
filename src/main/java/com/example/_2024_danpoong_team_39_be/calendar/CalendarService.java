@@ -227,4 +227,27 @@ public class CalendarService {
         // Calendar 삭제
         calendarRepository.delete(calendar);
     }
+    public Calendar getCalendarById(Long id) {
+        // ID를 기준으로 Calendar 객체를 조회하거나 예외 처리
+        return calendarRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 캘린더를 찾을 수 없습니다. ID: " + id));
+    }
+    @Transactional
+    public List<Calendar> getCalendarsForUser(String email) {
+        // 이메일로 CareAssignment 조회
+        CareAssignment careAssignment = getCareAssignmentByEmail(email);
+
+        // CareAssignment이 없을 경우 예외 처리
+        if (careAssignment == null) {
+            throw new IllegalArgumentException("해당 이메일에 연결된 CareAssignment가 없습니다.");
+        }
+
+        // CareAssignment에 연결된 일정 조회
+        return calendarRepository.findByCareAssignment(careAssignment);
+    }
+
+    // 서비스에서 CareAssignment를 이메일로 조회하는 메서드
+    public CareAssignment getCareAssignmentByEmail(String email) {
+        return careAssignmentRepository.findCareAssignmentByEmail(email);
+    }
 }
