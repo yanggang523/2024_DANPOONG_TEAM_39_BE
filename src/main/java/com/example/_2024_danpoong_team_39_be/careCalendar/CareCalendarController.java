@@ -5,6 +5,7 @@ import com.example._2024_danpoong_team_39_be.calendar.Calendar;
 import com.example._2024_danpoong_team_39_be.calendar.CalendarService;
 import com.example._2024_danpoong_team_39_be.careAssignment.CareAssignmentService;
 import com.example._2024_danpoong_team_39_be.domain.CareAssignment;
+import com.example._2024_danpoong_team_39_be.notification.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,8 @@ public class CareCalendarController {
     private CalendarService calendarService;
     @Autowired
     private CareAssignmentService careAssignmentService;
+    @Autowired
+    private NotificationService notificationService;
 
 
     //공유일정 전체 조회(weekly, daily)
@@ -108,21 +111,26 @@ public class CareCalendarController {
 
     @PostMapping("/rest")
     public Calendar createRestCalendar(@RequestBody Calendar calendar) {
+        notificationService.notifyCalendar(calendar);
         return createCalendarByCategory(calendar, "rest");
+
     }
 
     @PostMapping("/hospital")
     public Calendar createHospitalCalendar(@RequestBody Calendar calendar) {
+        notificationService.notifyCalendar(calendar);
         return createCalendarByCategory(calendar, "hospital");
     }
 
     @PostMapping("/meal")
     public Calendar createMealCalendar(@RequestBody Calendar calendar) {
+        notificationService.notifyCalendar(calendar);
         return createCalendarByCategory(calendar, "meal");
     }
 
     @PostMapping("/others")
     public Calendar createOthersCalendar(@RequestBody Calendar calendar) {
+        notificationService.notifyCalendar(calendar);
         return createCalendarByCategory(calendar, "others");
     }
     private Calendar createCalendarByCategory(Calendar calendar, String category) {

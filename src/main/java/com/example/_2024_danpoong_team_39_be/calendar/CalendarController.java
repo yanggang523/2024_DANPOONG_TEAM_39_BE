@@ -1,6 +1,7 @@
 package com.example._2024_danpoong_team_39_be.calendar;
 import com.example._2024_danpoong_team_39_be.login.BaseResponse;
 import com.example._2024_danpoong_team_39_be.login.util.JwtUtil;
+import com.example._2024_danpoong_team_39_be.notification.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -11,6 +12,8 @@ public class CalendarController {
     private final CalendarService calendarService;
     @Autowired
     private JwtUtil jwtUtil;
+    @Autowired
+    private NotificationService notificationService;
 
     public CalendarController(CalendarService calendarService) {
         this.calendarService = calendarService;
@@ -29,7 +32,7 @@ public BaseResponse<CalendarDTO> createCalendar(@RequestHeader("Authorization") 
         calendarDTO.setCategory("myCalendar");
     }
     Calendar calendar = calendarService.createCalendar(token, calendarDTO);
-
+    notificationService.notifyCalendar(calendar);
     return BaseResponse.onSuccess(CalendarConverter.toCalendarDTO(calendar));
 }
 
