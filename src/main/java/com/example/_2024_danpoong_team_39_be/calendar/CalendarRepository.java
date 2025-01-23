@@ -16,15 +16,6 @@ import java.util.Optional;
 @Repository
 public interface CalendarRepository extends JpaRepository<Calendar, Long> {
 
-
-    List<Calendar> findByCareAssignmentId(Long careAssignmentId);
-    // isShared가 true인 일정만 날짜별로 조회
-    List<Calendar> findByDateAndIsSharedTrue(LocalDate date);
-
-    // isShared가 true이고 startDate가 특정 주의 날짜 리스트에 포함된 일정 조회
-    List<Calendar> findByDateInAndIsSharedTrue(List<LocalDate> weekDates);
-
-
     // isShared가 true인 모든 일정 조회
     List<Calendar> findByIsSharedTrue();
 
@@ -48,6 +39,7 @@ public interface CalendarRepository extends JpaRepository<Calendar, Long> {
 
     @Query("SELECT c FROM Calendar c WHERE c.date = :date")
     List<Calendar> findByDate(@Param("date") LocalDate date);
+
 
 }
 

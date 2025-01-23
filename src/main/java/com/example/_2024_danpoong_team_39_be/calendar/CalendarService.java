@@ -250,4 +250,6 @@ public class CalendarService {
     public CareAssignment getCareAssignmentByEmail(String email) {
         return careAssignmentRepository.findCareAssignmentByEmail(email);
     }
+
+
 }

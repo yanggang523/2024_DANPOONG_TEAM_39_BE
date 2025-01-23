@@ -15,6 +15,7 @@ import lombok.Setter;
 
 import java.sql.Array;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,11 +24,10 @@ import java.util.List;
 @Setter
 @Entity
 
-public class Calendar {
+public class Calendar extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 기본 키
-
     @Column(nullable = false)
     private String title; // 일정 제목
     private String eventType; // 일정타입 공부, 팀플 등등
@@ -37,7 +37,6 @@ public class Calendar {
     private LocalTime endTime; // 종료 시간
     @Column(nullable = false)
     private LocalDate date; // 날짜
-
     @Enumerated(EnumType.STRING)
     private RepeatCycle repeatCycle;
     private Boolean isAllday;
@@ -60,7 +59,6 @@ public class Calendar {
     @Column(name = "care_assignment_id", insertable = false, updatable = false)
     private Long careAssignmentId;
 
-
     // 카테고리별 추가 정보 (식사, 병원, 휴식, 복약, 내일정)
     @OneToOne(mappedBy = "calendar", cascade = CascadeType.ALL)
     private Meal meal;
@@ -72,7 +70,7 @@ public class Calendar {
     private Rest rest;
 
     @OneToMany(mappedBy = "calendar", cascade = CascadeType.ALL)
-   private List<Medication> medications = new ArrayList<>();
+    private List<Medication> medications = new ArrayList<>();
 
     @OneToMany(mappedBy = "calendar", cascade = CascadeType.ALL)
     private List<Others> others = new ArrayList<>();
@@ -84,9 +82,11 @@ public class Calendar {
 
     @OneToMany(mappedBy = "calendar")
     private List<CareAssignment> careAssignments;
+
     // CareAssignment 리스트 설정 메서드
     public void setCareAssignments(List<CareAssignment> careAssignments) {
         this.careAssignments = careAssignments;
-
     }
+
+
 }
